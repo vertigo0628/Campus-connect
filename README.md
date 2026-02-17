@@ -1,6 +1,6 @@
 <div align="center">
   <img src="https://img.shields.io/badge/CAMPUS_CONNECT-KENYA_PDR-006633?style=for-the-badge&logo=university&logoColor=white" alt="Campus Connect Header" />
-  <h1>🚀 Campus Connect: Preliminary Design Review (PDR)</h1>
+  <h1> Campus Connect:(PDR)</h1>
   <p><i>A Centralized Digital Ecosystem for Kenyan University Students</i></p>
 </div>
 
