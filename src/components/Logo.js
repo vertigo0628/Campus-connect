@@ -1,0 +1,74 @@
+"use client";
+
+export default function Logo({ size = 80 }) {
+    return (
+        <svg
+            width={size}
+            height={size}
+            viewBox="0 0 120 120"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+            aria-label="Campus Connect Logo"
+        >
+            <defs>
+                <linearGradient id="logo-gradient" x1="0" y1="0" x2="1" y2="1">
+                    <stop offset="0%" stopColor="#006633" />
+                    <stop offset="50%" stopColor="#00994d" />
+                    <stop offset="100%" stopColor="#FFD700" />
+                </linearGradient>
+                <linearGradient id="ring-gradient" x1="0" y1="0" x2="1" y2="1">
+                    <stop offset="0%" stopColor="#FFD700" />
+                    <stop offset="100%" stopColor="#006633" />
+                </linearGradient>
+                <filter id="logo-glow">
+                    <feGaussianBlur stdDeviation="3" result="blur" />
+                    <feMerge>
+                        <feMergeNode in="blur" />
+                        <feMergeNode in="SourceGraphic" />
+                    </feMerge>
+                </filter>
+            </defs>
+
+            {/* Outer ring */}
+            <circle
+                cx="60"
+                cy="60"
+                r="56"
+                stroke="url(#ring-gradient)"
+                strokeWidth="2.5"
+                fill="none"
+                opacity="0.6"
+            />
+
+            {/* Inner background circle */}
+            <circle cx="60" cy="60" r="48" fill="#0f1724" />
+
+            {/* Network nodes (connection motif) */}
+            <circle cx="35" cy="38" r="3" fill="#FFD700" opacity="0.5" />
+            <circle cx="85" cy="38" r="3" fill="#FFD700" opacity="0.5" />
+            <circle cx="35" cy="82" r="3" fill="#006633" opacity="0.5" />
+            <circle cx="85" cy="82" r="3" fill="#006633" opacity="0.5" />
+
+            {/* Connection lines */}
+            <line x1="35" y1="38" x2="60" y2="52" stroke="#FFD700" strokeWidth="0.8" opacity="0.25" />
+            <line x1="85" y1="38" x2="60" y2="52" stroke="#FFD700" strokeWidth="0.8" opacity="0.25" />
+            <line x1="35" y1="82" x2="60" y2="68" stroke="#006633" strokeWidth="0.8" opacity="0.25" />
+            <line x1="85" y1="82" x2="60" y2="68" stroke="#006633" strokeWidth="0.8" opacity="0.25" />
+
+            {/* CC Monogram */}
+            <text
+                x="60"
+                y="67"
+                textAnchor="middle"
+                fontFamily="var(--font-geist-sans), Arial, sans-serif"
+                fontWeight="700"
+                fontSize="32"
+                fill="url(#logo-gradient)"
+                filter="url(#logo-glow)"
+                letterSpacing="-1"
+            >
+                CC
+            </text>
+        </svg>
+    );
+}

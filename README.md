@@ -18,7 +18,8 @@ The platform utilizes a **Modular Service-Oriented Architecture** designed for h
 
 * **Frontend:** React.js / Next.js (Optimized for PWA performance).
 * **Backend:** Node.js & Express (Scalable API Gateway).
-* **Database:** MongoDB Atlas (Flexible NoSQL schemas for diverse data).
+* **Authentication:** Firebase Authentication (Email/Password, Google, and Phone sign-in).
+* **Database & Storage:** Supabase (PostgreSQL database + Cloud Storage for file uploads and media).
 * **Payments:** M-Pesa Daraja API Integration (Lipa na M-Pesa).
 * **Safety:** Real-time WebSocket signaling for emergency triggers.
 
@@ -29,7 +30,7 @@ The platform utilizes a **Modular Service-Oriented Architecture** designed for h
 ### **A. The "Comrade Market" & Commerce**
 | Feature | Description | Implementation |
 | :--- | :--- | :--- |
-| **Book Swap/Resale** | A dedicated hub to buy and sell textbooks and revision materials. | CRUD + Cloudinary |
+| **Book Swap/Resale** | A dedicated hub to buy and sell textbooks and revision materials. | CRUD + Supabase Storage |
 | **Hostel Finder** | Peer-reviewed directory of private hostels with pricing and security ratings. | Ratings + Maps API |
 | **Side-Hustle Hub** | A portal for student services like coding, laundry, and photography. | Service Profiles |
 | **Dining Guide** | Instant access to information on Mess, STC, and other dining areas. | Location Services |
@@ -73,7 +74,12 @@ To maintain a professional and safe environment, the platform implements:
     cd CampusConnect
     ```
 2.  **Environment Configuration:**
-    Create a `.env` file and input your <kbd>MONGO_URI</kbd> and <kbd>MPESA_DARAJA_CREDENTIALS</kbd>.
+    Create a `.env` file and input the following keys:
+    * <kbd>SUPABASE_URL</kbd> — Your Supabase project URL.
+    * <kbd>SUPABASE_ANON_KEY</kbd> — Your Supabase anonymous/public key.
+    * <kbd>FIREBASE_API_KEY</kbd> — Your Firebase project API key.
+    * <kbd>FIREBASE_AUTH_DOMAIN</kbd> — Your Firebase Auth domain.
+    * <kbd>MPESA_DARAJA_CREDENTIALS</kbd> — Your M-Pesa Daraja API credentials.
 3.  **Boot the System:**
     ```bash
     npm install && npm run dev
