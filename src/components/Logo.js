@@ -1,6 +1,25 @@
 "use client";
 
+import { useState } from "react";
+
 export default function Logo({ size = 80 }) {
+    const [error, setError] = useState(false);
+
+    // If user has uploaded a logo.png, we'll try to show it first
+    if (!error) {
+        return (
+            <img
+                src="/brand/logo.png"
+                alt="Campus Connect Logo"
+                width={size}
+                height={size}
+                style={{ objectFit: 'contain' }}
+                onError={() => setError(true)}
+            />
+        );
+    }
+
+    // Fallback to the beautiful SVG monogram
     return (
         <svg
             width={size}
@@ -42,18 +61,6 @@ export default function Logo({ size = 80 }) {
 
             {/* Inner background circle */}
             <circle cx="60" cy="60" r="48" fill="#0f1724" />
-
-            {/* Network nodes (connection motif) */}
-            <circle cx="35" cy="38" r="3" fill="#FFD700" opacity="0.5" />
-            <circle cx="85" cy="38" r="3" fill="#FFD700" opacity="0.5" />
-            <circle cx="35" cy="82" r="3" fill="#006633" opacity="0.5" />
-            <circle cx="85" cy="82" r="3" fill="#006633" opacity="0.5" />
-
-            {/* Connection lines */}
-            <line x1="35" y1="38" x2="60" y2="52" stroke="#FFD700" strokeWidth="0.8" opacity="0.25" />
-            <line x1="85" y1="38" x2="60" y2="52" stroke="#FFD700" strokeWidth="0.8" opacity="0.25" />
-            <line x1="35" y1="82" x2="60" y2="68" stroke="#006633" strokeWidth="0.8" opacity="0.25" />
-            <line x1="85" y1="82" x2="60" y2="68" stroke="#006633" strokeWidth="0.8" opacity="0.25" />
 
             {/* CC Monogram */}
             <text
