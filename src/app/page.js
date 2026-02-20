@@ -125,6 +125,25 @@ export default function Home() {
         </div>
       </section>
 
+      {/* About Section */}
+      <section id="about" className={styles.about}>
+        <h2 className={styles.sectionTitle}>Meet the Team</h2>
+        <p className={styles.sectionSubtitle}>
+          We are a group of 9 dedicated students working to build the ultimate
+          digital ecosystem for Kenyan universities.
+        </p>
+
+        <div className={styles.teamGrid}>
+          {[1, 2, 3, 4, 5, 6, 7, 8, 9].map((member) => (
+            <div key={member} className={styles.teamMember}>
+              <div className={styles.memberAvatar}>👤</div>
+              <h4 className={styles.memberName}>Team Member {member}</h4>
+              <p className={styles.memberRole}>Developer / Designer</p>
+            </div>
+          ))}
+        </div>
+      </section>
+
       {/* Footer */}
       <footer className={styles.footer}>
         © 2026 Campus Connect Kenya — Made with{" "}
