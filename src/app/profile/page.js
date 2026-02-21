@@ -107,7 +107,8 @@ export default function Profile() {
             }
         } catch (error) {
             console.error("Error uploading image to Supabase:", error);
-            alert("Error uploading image. Ensure you have created the 'avatars' and 'showcase' buckets in Supabase and set them to public.");
+            const message = error.message || "Unknown error";
+            alert(`Upload failed: ${message}. \n\nCheck if your 'avatars' and 'showcase' buckets are Public and have RLS policies set to allow 'Insert'.`);
         } finally {
             setUploading(false);
         }
