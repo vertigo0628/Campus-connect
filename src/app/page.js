@@ -71,6 +71,9 @@ export default function Home() {
             <Link href="/signup" className={styles.navCta} onClick={() => setIsMenuOpen(false)}>Get Started</Link>
           )}
 
+          {!user && (
+            <Link href="/login" className={styles.navLink} onClick={() => setIsMenuOpen(false)}>Log In</Link>
+          )}
         </div>
       </nav>
 

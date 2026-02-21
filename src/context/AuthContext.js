@@ -5,7 +5,9 @@ import {
     onAuthStateChanged,
     signInWithPopup,
     signOut,
-    GoogleAuthProvider
+    GoogleAuthProvider,
+    createUserWithEmailAndPassword,
+    signInWithEmailAndPassword
 } from "firebase/auth";
 import { auth, googleProvider } from "@/lib/firebase";
 
@@ -13,6 +15,8 @@ const AuthContext = createContext({
     user: null,
     loading: true,
     signInWithGoogle: async () => { },
+    signUpWithEmail: async (email, password) => { },
+    signInWithEmail: async (email, password) => { },
     logout: async () => { },
 });
 
@@ -39,6 +43,25 @@ export function AuthProvider({ children }) {
             await signInWithPopup(auth, googleProvider);
         } catch (error) {
             console.error("Error signing in with Google:", error);
+            throw error;
+        }
+    };
+
+    const signUpWithEmail = async (email, password) => {
+        try {
+            await createUserWithEmailAndPassword(auth, email, password);
+        } catch (error) {
+            console.error("Error signing up with email:", error);
+            throw error;
+        }
+    };
+
+    const signInWithEmail = async (email, password) => {
+        try {
+            await signInWithEmailAndPassword(auth, email, password);
+        } catch (error) {
+            console.error("Error signing in with email:", error);
+            throw error;
         }
     };
 
@@ -51,7 +74,7 @@ export function AuthProvider({ children }) {
     };
 
     return (
-        <AuthContext.Provider value={{ user, loading, signInWithGoogle, logout }}>
+        <AuthContext.Provider value={{ user, loading, signInWithGoogle, signUpWithEmail, signInWithEmail, logout }}>
             {children}
         </AuthContext.Provider>
     );

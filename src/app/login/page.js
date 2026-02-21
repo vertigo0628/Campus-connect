@@ -7,8 +7,8 @@ import styles from "../page.module.css";
 import Logo from "@/components/Logo";
 import { useAuth } from "@/context/AuthContext";
 
-export default function Signup() {
-    const { user, signInWithGoogle, signUpWithEmail, loading } = useAuth();
+export default function Login() {
+    const { user, signInWithGoogle, signInWithEmail, loading } = useAuth();
     const router = useRouter();
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
@@ -20,11 +20,11 @@ export default function Signup() {
         }
     }, [user, loading, router]);
 
-    const handleEmailSignup = async (e) => {
+    const handleEmailSignin = async (e) => {
         e.preventDefault();
         setError("");
         try {
-            await signUpWithEmail(email, password);
+            await signInWithEmail(email, password);
         } catch (err) {
             setError(err.message);
         }
@@ -50,16 +50,16 @@ export default function Signup() {
                 </div>
 
                 <h1 className={styles.signupTitle}>
-                    Ready to <span className={styles.heroTitleGradient}>Dive In?</span>
+                    Welcome <span className={styles.heroTitleGradient}>Back!</span>
                 </h1>
 
                 <p className={styles.signupDescription}>
-                    Join Campus Connect today and stay connected with your university network.
+                    Sign in to continue connecting with your university network.
                 </p>
 
                 {error && <p className={styles.errorMessage}>{error}</p>}
 
-                <form onSubmit={handleEmailSignup} className={styles.authForm}>
+                <form onSubmit={handleEmailSignin} className={styles.authForm}>
                     <div className={styles.inputGroup}>
                         <label htmlFor="email">Email</label>
                         <input
@@ -83,7 +83,7 @@ export default function Signup() {
                         />
                     </div>
                     <button type="submit" className={styles.btnPrimary} style={{ width: '100%', marginTop: '16px' }}>
-                        Sign Up with Email
+                        Log In
                     </button>
                 </form>
 
@@ -106,7 +106,7 @@ export default function Signup() {
 
                 <div style={{ marginTop: "32px", textAlign: "center" }}>
                     <p style={{ marginBottom: "12px", opacity: 0.8 }}>
-                        Already have an account? <Link href="/login" style={{ color: "var(--primary-color)", fontWeight: "bold" }}>Log In</Link>
+                        Don't have an account? <Link href="/signup" style={{ color: "var(--primary-color)", fontWeight: "bold" }}>Sign Up</Link>
                     </p>
                     <Link href="/" className={styles.returnLink}>
                         Return to home
