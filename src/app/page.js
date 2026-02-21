@@ -14,6 +14,16 @@ export default function Home() {
   const router = useRouter();
   const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
 
+  // Automatic redirect for logged-in users
+  useEffect(() => {
+    if (user) {
+      const timer = setTimeout(() => {
+        router.push("/profile");
+      }, 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [user, router]);
+
   const goToDashboard = () => {
     router.push("/profile");
     setIsMenuOpen(false);
