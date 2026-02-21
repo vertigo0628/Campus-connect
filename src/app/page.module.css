@@ -194,6 +194,11 @@
   padding: 120px 24px 60px;
   position: relative;
   z-index: 1;
+  background: linear-gradient(rgba(10, 14, 23, 0.85), rgba(10, 14, 23, 0.6)), url('/backgrounds/groupPhoto.jpg');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
 }
 
 .heroContent {
