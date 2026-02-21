@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 import styles from "./page.module.css";
 import Logo from "@/components/Logo";
@@ -10,7 +11,13 @@ export default function Home() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const { user, logout } = useAuth();
 
+  const router = useRouter();
   const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
+
+  const goToDashboard = () => {
+    router.push("/profile");
+    setIsMenuOpen(false);
+  };
 
   return (
     <div className={styles.wrapper}>
@@ -41,10 +48,10 @@ export default function Home() {
         </button>
 
         <div className={`${styles.navLinks} ${isMenuOpen ? styles.navLinksOpen : ""}`}>
-          <a href="#features" className={styles.navLink} onClick={() => setIsMenuOpen(false)}>Features</a>
 
           {user ? (
             <div className={styles.userProfile}>
+              <button className={styles.navLink} onClick={goToDashboard}>Dashboard</button>
               <Link href="/profile">
                 <img src={user.photoURL || "https://ui-avatars.com/api/?name=" + user.displayName} alt={user.displayName} className={styles.userAvatar} />
               </Link>
@@ -53,6 +60,7 @@ export default function Home() {
           ) : (
             <Link href="/signup" className={styles.navCta} onClick={() => setIsMenuOpen(false)}>Get Started</Link>
           )}
+
         </div>
       </nav>
 
