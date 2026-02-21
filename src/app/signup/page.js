@@ -13,7 +13,7 @@ export default function Signup() {
 
     useEffect(() => {
         if (user && !loading) {
-            router.push("/");
+            router.push("/profile");
         }
     }, [user, loading, router]);
 
