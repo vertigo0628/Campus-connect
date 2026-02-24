@@ -54,6 +54,7 @@ export default function Home() {
 
           {user ? (
             <div className={styles.userProfile}>
+              <Link href="/discover" className={styles.navLink} onClick={() => setIsMenuOpen(false)}>Discover</Link>
               <button className={styles.navLink} onClick={goToDashboard}>Dashboard</button>
               <Link href="/profile">
                 <img src={user.photoURL || "https://ui-avatars.com/api/?name=" + user.displayName} alt={user.displayName} className={styles.userAvatar} />
@@ -105,7 +106,10 @@ export default function Home() {
 
           <div className={styles.heroCtas}>
             {user ? (
-              <span className={styles.welcomeText}>Welcome back, {user.displayName}!</span>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', alignItems: 'center' }}>
+                <span className={styles.welcomeText}>Welcome back, {user.displayName || user.email.split('@')[0]}!</span>
+                <Link href="/discover" className={styles.btnPrimary}>Discover Comrades</Link>
+              </div>
             ) : (
               <>
                 <Link href="/signup" className={styles.btnPrimary}>Get Started Today</Link>

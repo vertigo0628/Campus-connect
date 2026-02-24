@@ -201,6 +201,13 @@ export default function Profile() {
                         >
                             View Public Profile
                         </button>
+                        <button
+                            className={styles.editBtn}
+                            style={{ background: 'var(--primary)', color: 'white', border: 'none' }}
+                            onClick={() => router.push(`/discover`)}
+                        >
+                            Discover Comrades
+                        </button>
                     </div>
 
                     <div className={styles.statsRow}>
