@@ -226,6 +226,54 @@ export default function Profile() {
                                     onChange={(e) => setProfile(prev => ({ ...prev, bio: e.target.value }))}
                                 />
                             </div>
+
+                            <div className={styles.inputGroup}>
+                                <label className={styles.label}>Services Offered</label>
+                                <div className={styles.servicesGrid} style={{ marginBottom: "12px", justifyContent: "flex-start" }}>
+                                    {profile.services.map((service, i) => (
+                                        <span key={i} className={styles.serviceTag}>
+                                            {service}
+                                            <button
+                                                type="button"
+                                                style={{ background: 'none', border: 'none', color: 'inherit', marginLeft: '6px', cursor: 'pointer', padding: 0, fontWeight: 'bold' }}
+                                                onClick={() => {
+                                                    setProfile(prev => ({ ...prev, services: prev.services.filter((_, index) => index !== i) }));
+                                                }}
+                                            >×</button>
+                                        </span>
+                                    ))}
+                                </div>
+                                <div style={{ display: 'flex', gap: '8px' }}>
+                                    <input
+                                        className={styles.input}
+                                        id="newServiceInput"
+                                        placeholder="Add a service (e.g. Graphic Design)"
+                                        onKeyDown={(e) => {
+                                            if (e.key === 'Enter') {
+                                                e.preventDefault();
+                                                const val = e.target.value.trim();
+                                                if (val && !profile.services.includes(val)) {
+                                                    setProfile(prev => ({ ...prev, services: [...prev.services, val] }));
+                                                    e.target.value = '';
+                                                }
+                                            }
+                                        }}
+                                    />
+                                    <button
+                                        type="button"
+                                        className={styles.editBtn}
+                                        onClick={() => {
+                                            const input = document.getElementById('newServiceInput');
+                                            const val = input.value.trim();
+                                            if (val && !profile.services.includes(val)) {
+                                                setProfile(prev => ({ ...prev, services: [...prev.services, val] }));
+                                                input.value = '';
+                                            }
+                                        }}
+                                    >Add</button>
+                                </div>
+                            </div>
+
                             <button type="submit" className={styles.saveBtn}>Save Changes</button>
                         </form>
                     ) : (
