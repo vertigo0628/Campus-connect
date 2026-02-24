@@ -10,6 +10,7 @@ import styles from "./profile.module.css";
 import Logo from "@/components/Logo";
 import LogoutModal from "@/components/LogoutModal";
 import Link from "next/link";
+import MediaModal from "@/components/MediaModal";
 
 export default function Profile() {
     const { user, loading: authLoading, logout } = useAuth();
@@ -31,7 +32,15 @@ export default function Profile() {
     const [uploading, setUploading] = useState(false);
     const fileInputRef = useRef(null);
     const galleryInputRef = useRef(null);
+    const [mediaModal, setMediaModal] = useState({ isOpen: false, src: "", type: "image" });
 
+    const openMedia = (src, type = "image") => {
+        setMediaModal({ isOpen: true, src, type });
+    };
+
+    const closeMedia = () => {
+        setMediaModal(prev => ({ ...prev, isOpen: false }));
+    };
     useEffect(() => {
         if (!authLoading && !user) {
             router.push("/signup");
@@ -164,18 +173,31 @@ export default function Profile() {
                 onConfirm={() => {
                     logout();
                     setIsLogoutModalOpen(false);
+                    router.push("/");
                 }}
+            />
+
+            <MediaModal
+                isOpen={mediaModal.isOpen}
+                src={mediaModal.src}
+                type={mediaModal.type}
+                onClose={closeMedia}
             />
 
             <header className={styles.header}>
                 <div className={styles.avatarSection}>
-                    <div className={styles.avatarContainer} onClick={() => fileInputRef.current.click()}>
-                        <img
-                            src={profile.photoURL || "https://ui-avatars.com/api/?name=" + profile.displayName}
-                            alt="Profile"
-                            className={styles.avatar}
-                        />
-                        <div className={styles.uploadOverlay}>
+                    <div className={styles.avatarContainer}>
+                        <div className={styles.avatarWrapper} onClick={() => openMedia(profile.photoURL || "https://ui-avatars.com/api/?name=" + (profile.displayName || user.email.split('@')[0]), "image")}>
+                            <img
+                                src={profile.photoURL || "https://ui-avatars.com/api/?name=" + (profile.displayName || user.email.split('@')[0])}
+                                alt="Profile Avatar"
+                                className={styles.avatar}
+                            />
+                            <div className={styles.avatarOverlay}>
+                                <span>View</span>
+                            </div>
+                        </div>
+                        <div className={styles.uploadOverlay} onClick={() => fileInputRef.current.click()}>
                             {uploading ? "Uploading..." : "Change Photo"}
                         </div>
                     </div>
@@ -336,7 +358,7 @@ export default function Profile() {
 
                     <div className={styles.galleryGrid}>
                         {profile.gallery.map((img, i) => (
-                            <div key={i} className={styles.galleryItem}>
+                            <div key={i} className={styles.galleryItem} onClick={() => openMedia(img, img.endsWith('.mp4') || img.endsWith('.mov') ? 'video' : 'image')}>
                                 {img.endsWith('.mp4') || img.endsWith('.mov') ? (
                                     <video src={img} className={styles.itemImage} />
                                 ) : (

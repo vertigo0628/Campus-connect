@@ -65,6 +65,34 @@
     opacity: 1;
 }
 
+.avatarWrapper {
+    width: 100%;
+    height: 100%;
+    position: relative;
+    cursor: pointer;
+}
+
+.avatarOverlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    color: white;
+    font-size: 0.9rem;
+    font-weight: 600;
+}
+
+.avatarWrapper:hover .avatarOverlay {
+    opacity: 1;
+}
+
 .infoSection {
     flex: 1;
 }

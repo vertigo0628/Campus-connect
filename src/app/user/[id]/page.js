@@ -8,6 +8,7 @@ import { useAuth } from "@/context/AuthContext";
 import styles from "@/app/profile/profile.module.css";
 import Link from "next/link";
 import Logo from "@/components/Logo";
+import MediaModal from "@/components/MediaModal";
 
 export default function PublicProfile({ params }) {
     const unwrappedParams = use(params);
@@ -26,6 +27,17 @@ export default function PublicProfile({ params }) {
     const [comment, setComment] = useState("");
     const [submittingReview, setSubmittingReview] = useState(false);
     const [reviewError, setReviewError] = useState("");
+
+    // Media View State
+    const [mediaModal, setMediaModal] = useState({ isOpen: false, src: "", type: "image" });
+
+    const openMedia = (src, type = "image") => {
+        setMediaModal({ isOpen: true, src, type });
+    };
+
+    const closeMedia = () => {
+        setMediaModal(prev => ({ ...prev, isOpen: false }));
+    };
 
     useEffect(() => {
         if (!targetUserId) return;
@@ -154,12 +166,15 @@ export default function PublicProfile({ params }) {
 
             <header className={styles.header}>
                 <div className={styles.avatarSection}>
-                    <div className={styles.avatarContainer} style={{ cursor: 'default' }}>
+                    <div className={styles.avatarContainer} style={{ cursor: 'pointer' }} onClick={() => openMedia(profile.photoURL || "https://ui-avatars.com/api/?name=" + profile.displayName, "image")}>
                         <img
                             src={profile.photoURL || "https://ui-avatars.com/api/?name=" + profile.displayName}
                             alt="Profile"
                             className={styles.avatar}
                         />
+                        <div className={styles.avatarOverlay}>
+                            <span>View</span>
+                        </div>
                     </div>
                 </div>
 
@@ -214,9 +229,9 @@ export default function PublicProfile({ params }) {
                 <div className={styles.galleryContent}>
                     <div className={styles.galleryGrid}>
                         {profile.gallery?.map((img, i) => (
-                            <div key={i} className={styles.galleryItem} style={{ cursor: 'default' }}>
+                            <div key={i} className={styles.galleryItem} style={{ cursor: 'pointer' }} onClick={() => openMedia(img, img.endsWith('.mp4') || img.endsWith('.mov') ? 'video' : 'image')}>
                                 {img.endsWith('.mp4') || img.endsWith('.mov') ? (
-                                    <video src={img} className={styles.itemImage} controls />
+                                    <video src={img} className={styles.itemImage} muted />
                                 ) : (
                                     <img src={img} alt={`Gallery ${i}`} className={styles.itemImage} />
                                 )}
@@ -303,6 +318,13 @@ export default function PublicProfile({ params }) {
                     </div>
                 </div>
             )}
+
+            <MediaModal
+                isOpen={mediaModal.isOpen}
+                src={mediaModal.src}
+                type={mediaModal.type}
+                onClose={closeMedia}
+            />
         </div>
     );
 }
