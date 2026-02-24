@@ -18,10 +18,15 @@ export default function Profile() {
     const [profile, setProfile] = useState({
         displayName: "",
         bio: "",
+        photoURL: null,
         services: [],
         gallery: [],
-        photoURL: ""
+        rating: "New",
+        reviewCount: 0,
+        followers: 0,
+        following: 0
     });
+    const [activeTab, setActiveTab] = useState('POSTS');
     const [isEditing, setIsEditing] = useState(false);
     const [uploading, setUploading] = useState(false);
     const fileInputRef = useRef(null);
@@ -44,14 +49,29 @@ export default function Profile() {
             const docSnap = await getDoc(docRef);
 
             if (docSnap.exists()) {
-                setProfile(docSnap.data());
+                const data = docSnap.data();
+                setProfile({
+                    displayName: data.displayName || "",
+                    bio: data.bio || "",
+                    photoURL: data.photoURL || null,
+                    services: data.services || [],
+                    gallery: data.gallery || [],
+                    rating: data.rating || "New",
+                    reviewCount: data.reviewCount || 0,
+                    followers: data.followers || 0,
+                    following: data.following || 0
+                });
             } else {
                 const initialProfile = {
                     displayName: user.displayName || "Comrade",
                     bio: "Welcome to my campus profile!",
                     services: ["Textbook Trade", "Study Groups"],
                     gallery: [],
-                    photoURL: user.photoURL || ""
+                    photoURL: user.photoURL || null,
+                    rating: "New",
+                    reviewCount: 0,
+                    followers: 0,
+                    following: 0
                 };
                 await setDoc(docRef, initialProfile);
                 setProfile(initialProfile);
@@ -176,6 +196,18 @@ export default function Profile() {
                         </button>
                     </div>
 
+                    <div className={styles.statsRow}>
+                        <div className={styles.statItem}>
+                            <span className={styles.statValue}>{profile.gallery.length}</span> posts
+                        </div>
+                        <div className={styles.statItem}>
+                            <span className={styles.statValue}>{profile.followers || 0}</span> followers
+                        </div>
+                        <div className={styles.statItem}>
+                            <span className={styles.statValue}>{profile.following || 0}</span> following
+                        </div>
+                    </div>
+
                     {isEditing ? (
                         <form onSubmit={handleUpdateProfile} className={styles.editForm}>
                             <div className={styles.inputGroup}>
@@ -200,71 +232,78 @@ export default function Profile() {
                         <div className={styles.bioSection}>
                             <span className={styles.displayName}>{profile.displayName}</span>
                             <p className={styles.bio}>{profile.bio}</p>
+
+                            <div className={styles.servicesGrid}>
+                                {profile.services.map((service, i) => (
+                                    <span key={i} className={styles.serviceTag}>{service}</span>
+                                ))}
+                            </div>
+
+                            <div className={styles.ratingContainer}>
+                                <span className={styles.star}>⭐</span>
+                                <span style={{ fontWeight: 600, color: 'white' }}>{profile.rating || 'New'}</span>
+                                {profile.reviewCount > 0 && <span>({profile.reviewCount} reviews)</span>}
+                            </div>
                         </div>
                     )}
                 </div>
             </header>
 
-            <div className={styles.servicesSection}>
-                <div className={styles.sectionTitle}>Services & Interests</div>
-                <div className={styles.servicesGrid}>
-                    {profile.services.map((service, i) => (
-                        <span key={i} className={styles.serviceTag}>{service}</span>
-                    ))}
-                    <button
-                        className={styles.serviceTag}
-                        style={{ background: "transparent", borderStyle: "dashed", cursor: "pointer" }}
-                        onClick={() => {
-                            const s = prompt("Add a service (e.g., Laptop Repair, Tutoring)");
-                            if (s) {
-                                const newServices = [...profile.services, s];
-                                setProfile(prev => ({ ...prev, services: newServices }));
-                                updateDoc(doc(db, "profiles", user.uid), { services: newServices });
-                            }
-                        }}
-                    >
-                        + Add Service
-                    </button>
+            <div className={styles.tabs}>
+                <div className={`${styles.tab} ${activeTab === 'POSTS' ? styles.activeTab : ''}`} onClick={() => setActiveTab('POSTS')}>
+                    POSTS
+                </div>
+                <div className={`${styles.tab} ${activeTab === 'REVIEWS' ? styles.activeTab : ''}`} onClick={() => setActiveTab('REVIEWS')}>
+                    REVIEWS
                 </div>
             </div>
 
-            <div className={styles.servicesSection} style={{ marginTop: "60px" }}>
-                <div className={styles.sectionTitle}>Showcase Gallery</div>
-                <div style={{ textAlign: "center", marginBottom: "30px" }}>
-                    <button
-                        className={styles.editBtn}
-                        onClick={() => galleryInputRef.current.click()}
-                        disabled={uploading}
-                    >
-                        {uploading ? "Uploading..." : "Add Photo/Video to Gallery"}
-                    </button>
-                    <input
-                        type="file"
-                        hidden
-                        ref={galleryInputRef}
-                        onChange={(e) => handleImageUpload(e, 'gallery')}
-                        accept="image/*,video/*"
-                    />
-                </div>
+            {activeTab === 'POSTS' && (
+                <div className={styles.galleryContent}>
+                    <div style={{ textAlign: "center", margin: "20px 0" }}>
+                        <button
+                            className={styles.editBtn}
+                            onClick={() => galleryInputRef.current.click()}
+                            disabled={uploading}
+                        >
+                            {uploading ? "Uploading..." : "Add New Post"}
+                        </button>
+                        <input
+                            type="file"
+                            hidden
+                            ref={galleryInputRef}
+                            onChange={(e) => handleImageUpload(e, 'gallery')}
+                            accept="image/*,video/*"
+                        />
+                    </div>
 
-                <div className={styles.galleryGrid}>
-                    {profile.gallery.map((img, i) => (
-                        <div key={i} className={styles.galleryItem}>
-                            {img.endsWith('.mp4') || img.endsWith('.mov') ? (
-                                <video src={img} className={styles.itemImage} />
-                            ) : (
-                                <img src={img} alt={`Gallery ${i}`} className={styles.itemImage} />
-                            )}
-                            <div className={styles.itemOverlay}>✨</div>
-                        </div>
-                    ))}
+                    <div className={styles.galleryGrid}>
+                        {profile.gallery.map((img, i) => (
+                            <div key={i} className={styles.galleryItem}>
+                                {img.endsWith('.mp4') || img.endsWith('.mov') ? (
+                                    <video src={img} className={styles.itemImage} />
+                                ) : (
+                                    <img src={img} alt={`Gallery ${i}`} className={styles.itemImage} />
+                                )}
+                                <div className={styles.itemOverlay}>✨</div>
+                            </div>
+                        ))}
+                    </div>
                     {profile.gallery.length === 0 && (
-                        <div style={{ gridColumn: "1 / -1", textAlign: "center", padding: "40px", color: "var(--text-secondary)" }}>
-                            No items yet. Showcase your products or shop!
+                        <div style={{ textAlign: "center", padding: "60px", color: "var(--text-secondary)" }}>
+                            <h2>No Posts Yet</h2>
+                            <p>Share your campus life with the network.</p>
                         </div>
                     )}
                 </div>
-            </div>
+            )}
+
+            {activeTab === 'REVIEWS' && (
+                <div style={{ textAlign: "center", padding: "60px", color: "var(--text-secondary)" }}>
+                    <h2>No Reviews Yet</h2>
+                    <p>When Comrades rate your services, they will appear here.</p>
+                </div>
+            )}
         </div>
     );
 }
