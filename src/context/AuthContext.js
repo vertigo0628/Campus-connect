@@ -38,6 +38,59 @@ export function AuthProvider({ children }) {
         return () => unsubscribe();
     }, []);
 
+    // --- NEW STRICT STUDENT EMAIL VERIFICATION ---
+    // Enforces logins strictly to the '@students.must.ac.ke' domain.
+    const isStudentEmail = (email) => {
+        return email && email.toLowerCase().endsWith('@students.must.ac.ke');
+    };
+
+    const signInWithGoogle = async () => {
+        try {
+            const result = await signInWithPopup(auth, googleProvider);
+            if (!isStudentEmail(result.user.email)) {
+                await signOut(auth);
+                const error = new Error("Only @students.must.ac.ke emails are allowed.");
+                error.code = 'auth/unauthorized-domain';
+                throw error;
+            }
+        } catch (error) {
+            console.error("Error signing in with Google:", error);
+            throw error;
+        }
+    };
+
+    const signUpWithEmail = async (email, password) => {
+        try {
+            if (!isStudentEmail(email)) {
+                const error = new Error("Only @students.must.ac.ke emails are allowed.");
+                error.code = 'auth/unauthorized-domain';
+                throw error;
+            }
+            await createUserWithEmailAndPassword(auth, email, password);
+        } catch (error) {
+            console.error("Error signing up with email:", error);
+            throw error;
+        }
+    };
+
+    const signInWithEmail = async (email, password) => {
+        try {
+            if (!isStudentEmail(email)) {
+                const error = new Error("Only @students.must.ac.ke emails are allowed.");
+                error.code = 'auth/unauthorized-domain';
+                throw error;
+            }
+            await signInWithEmailAndPassword(auth, email, password);
+        } catch (error) {
+            console.error("Error signing in with email:", error);
+            throw error;
+        }
+    };
+
+    /* 
+    // --- ORIGINAL CODE (FOR FUTURE SCALING TO ALL EMAILS) ---
+    // Uncomment these functions and remove the strict ones above to allow any email domain.
+    
     const signInWithGoogle = async () => {
         try {
             await signInWithPopup(auth, googleProvider);
@@ -64,6 +117,7 @@ export function AuthProvider({ children }) {
             throw error;
         }
     };
+    */
 
     const logout = async () => {
         try {

@@ -31,6 +31,7 @@ export default function Signup() {
             let message = "An error occurred. Please try again.";
             if (err.code === 'auth/email-already-in-use') message = "This email is already registered.";
             if (err.code === 'auth/weak-password') message = "Password should be at least 6 characters.";
+            if (err.code === 'auth/unauthorized-domain') message = "Only @students.must.ac.ke emails are allowed.";
             setError(message);
         } finally {
             setIsSubmitting(false);
@@ -68,14 +69,16 @@ export default function Signup() {
 
                 <form onSubmit={handleEmailSignup} className={styles.authForm}>
                     <div className={styles.inputGroup}>
-                        <label htmlFor="email">Email</label>
+                        <label htmlFor="email">University Email</label>
                         <input
                             type="email"
                             id="email"
                             value={email}
                             onChange={(e) => setEmail(e.target.value)}
                             required
-                            placeholder="your@email.com"
+                            pattern=".*@students\.must\.ac\.ke$"
+                            title="Please use your @students.must.ac.ke email address"
+                            placeholder="names@students.must.ac.ke"
                         />
                     </div>
                     <div className={styles.inputGroup}>

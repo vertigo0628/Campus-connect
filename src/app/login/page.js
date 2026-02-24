@@ -32,6 +32,7 @@ export default function Login() {
             if (err.code === 'auth/invalid-credential') message = "Invalid email or password.";
             if (err.code === 'auth/user-not-found') message = "No account found with this email.";
             if (err.code === 'auth/wrong-password') message = "Incorrect password.";
+            if (err.code === 'auth/unauthorized-domain') message = "Only @students.must.ac.ke emails are allowed.";
             setError(message);
         } finally {
             setIsSubmitting(false);
@@ -69,14 +70,16 @@ export default function Login() {
 
                 <form onSubmit={handleEmailSignin} className={styles.authForm}>
                     <div className={styles.inputGroup}>
-                        <label htmlFor="email">Email</label>
+                        <label htmlFor="email">University Email</label>
                         <input
                             type="email"
                             id="email"
                             value={email}
                             onChange={(e) => setEmail(e.target.value)}
                             required
-                            placeholder="your@email.com"
+                            pattern=".*@students\.must\.ac\.ke$"
+                            title="Please use your @students.must.ac.ke email address"
+                            placeholder="names@students.must.ac.ke"
                         />
                     </div>
                     <div className={styles.inputGroup}>
