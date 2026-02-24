@@ -4,6 +4,8 @@
   <p><i>A Centralized Digital Ecosystem for Kenyan University Students</i></p>
 </div>
 
+### 📑 [View Full Project Design Report (PDR)](./PDR.md)
+
 ---
 
 ## 📖 1. Project Mission & Value Proposition
