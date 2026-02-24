@@ -14,7 +14,7 @@
 
 
 ## 1. Executive Summary
-Campus Connect Kenya is a premium, mobile-first social and utility platform designed exclusively for university students in Kenya. It bridges the gap between academic life and campus commerce by providing a streamlined, high-trust environment for students to network, trade services, and access essential campus resources. Using a hybrid cloud architecture, the platform offers real-time connectivity and high-performance media sharing.
+Campus Connect Kenya is a mobile-first social and utility platform designed exclusively for university students in Kenya. It bridges the gap between academic life and campus commerce by providing a streamlined, high-trust environment for students to network, trade services, and access essential campus resources. Using a hybrid cloud architecture, the platform offers real-time connectivity and high-performance media sharing.
 
 ## 2. Product Overview
 
@@ -108,7 +108,7 @@ A hybrid cloud approach where Firebase handles rapid metadata and auth, while Su
 4. **Phase 7**: Auth Flow Polish & Landing Page Optimization.
 
 ### Timeline
-- **Build Duration**: ~3-7 Weeks to stable MVP.
+- **Build Duration**: ~4-8 Weeks to stable MVP.
 
 ## 7. Testing & Deployment
 - **Testing**: Managed via Browser Subagents for automated UI validation.
