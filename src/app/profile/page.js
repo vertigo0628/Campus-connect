@@ -194,6 +194,13 @@ export default function Profile() {
                         <button className={styles.editBtn} onClick={() => setIsEditing(!isEditing)}>
                             {isEditing ? "Cancel" : "Edit Profile"}
                         </button>
+                        <button
+                            className={styles.editBtn}
+                            style={{ background: 'transparent', color: 'var(--primary-light)', border: '1px solid var(--primary)' }}
+                            onClick={() => router.push(`/user/${user.uid}`)}
+                        >
+                            View Public Profile
+                        </button>
                     </div>
 
                     <div className={styles.statsRow}>
