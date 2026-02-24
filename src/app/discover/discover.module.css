@@ -45,11 +45,12 @@
     width: 100%;
     background-color: var(--surface);
     border: 1px solid var(--border);
-    border-radius: 8px;
-    padding: 16px 20px 16px 44px;
+    border-radius: 12px;
+    padding: 18px 20px 18px 48px;
+    /* Increased for better touch and readability */
     color: var(--text-primary);
     font-size: 1rem;
-    transition: all 0.2s ease;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .searchInput:focus {
@@ -156,14 +157,19 @@
 
 .viewProfileBtn {
     width: 100%;
+    min-height: 44px;
+    /* Ergonomic touch target */
     padding: 10px;
     background-color: transparent;
     border: 1px solid var(--border);
     color: var(--text-primary);
-    border-radius: 6px;
+    border-radius: 8px;
     font-size: 0.9rem;
     font-weight: 600;
     transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .card:hover .viewProfileBtn {
@@ -180,7 +186,21 @@
 }
 
 @media (max-width: 600px) {
+    .container {
+        padding: 0 16px;
+        /* Reclaim space on mobile */
+    }
+
+    .searchTitle {
+        font-size: 1.6rem;
+    }
+
     .grid {
         grid-template-columns: 1fr;
+        gap: 16px;
+    }
+
+    .card {
+        padding: 20px;
     }
 }
