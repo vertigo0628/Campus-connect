@@ -1,0 +1,86 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ===== Helper Functions =====
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isStudentEmail() {
+      return request.auth.token.email.matches('.*@students\\.must\\.ac\\.ke$');
+    }
+
+    // ===== Content Collections =====
+    match /sema_posts/{postId} {
+      allow read: if true;
+      allow create: if isSignedIn();
+      allow update: if isSignedIn();
+      allow delete: if isSignedIn() && request.auth.uid == resource.data.creatorId;
+
+      // Comments sub-collection
+      match /comments/{commentId} {
+        allow read: if true;
+        allow create: if isSignedIn();
+        allow delete: if isSignedIn() && request.auth.uid == resource.data.authorId;
+      }
+
+      // Likes sub-collection
+      match /likes/{userId} {
+        allow read: if true;
+        allow write: if isSignedIn() && request.auth.uid == userId;
+      }
+    }
+
+    match /profiles/{userId} {
+      allow read: if true;
+      allow write: if isSignedIn() && request.auth.uid == userId;
+
+      match /followers/{followerId} {
+        allow read: if true;
+        allow write: if isSignedIn();
+      }
+      match /following/{followedId} {
+        allow read: if true;
+        allow write: if isSignedIn() && request.auth.uid == userId;
+      }
+    }
+    
+    match /reviews/{docId} {
+      allow read: if true;
+      allow create: if isSignedIn();
+    }
+
+    match /study_groups/{groupId} {
+      allow read: if true;
+      allow create: if isSignedIn();
+      allow update: if isSignedIn();
+      allow delete: if isSignedIn() && request.auth.uid == resource.data.creatorId;
+    }
+
+    match /hostels/{hostelId} {
+      allow read: if true;
+      allow create: if isSignedIn();
+      allow update: if isSignedIn() && request.auth.uid == resource.data.creatorId;
+      allow delete: if isSignedIn() && request.auth.uid == resource.data.creatorId;
+    }
+
+    match /emergency_alerts/{alertId} {
+      allow read: if isSignedIn();
+      allow create: if isSignedIn();
+    }
+
+    // ===== CONVERSATIONS (Private DMs) =====
+    match /conversations/{convoId} {
+      allow read: if isSignedIn() && request.auth.uid in resource.data.participants;
+      allow create: if isSignedIn();
+      allow update: if isSignedIn() && request.auth.uid in resource.data.participants;
+
+      match /messages/{msgId} {
+        allow read: if isSignedIn() && request.auth.uid in get(/databases/$(database)/documents/conversations/$(convoId)).data.participants;
+        allow create: if isSignedIn() && request.auth.uid in get(/databases/$(database)/documents/conversations/$(convoId)).data.participants;
+      }
+    }
+  }
+}

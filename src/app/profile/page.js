@@ -5,12 +5,15 @@ import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 import { db } from "@/lib/firebase";
 import { supabase } from "@/lib/supabase";
-import { doc, getDoc, setDoc, updateDoc, arrayUnion } from "firebase/firestore";
+import { doc, getDoc, setDoc, updateDoc, arrayUnion, collection, query, where, getDocs, deleteDoc, onSnapshot } from "firebase/firestore";
+import { deleteUser } from "firebase/auth";
 import styles from "./profile.module.css";
 import Logo from "@/components/Logo";
 import LogoutModal from "@/components/LogoutModal";
 import Link from "next/link";
 import MediaModal from "@/components/MediaModal";
+import SocialListModal from "@/components/SocialListModal";
+import SmartConfirmModal from "@/components/SmartConfirmModal";
 
 export default function Profile() {
     const { user, loading: authLoading, logout } = useAuth();
@@ -32,7 +35,11 @@ export default function Profile() {
     const [uploading, setUploading] = useState(false);
     const fileInputRef = useRef(null);
     const galleryInputRef = useRef(null);
+    const [confirmState, setConfirmState] = useState({ isOpen: false, title: "", message: "", action: null, loading: false });
     const [mediaModal, setMediaModal] = useState({ isOpen: false, src: "", type: "image" });
+    const [socialModal, setSocialModal] = useState({ isOpen: false, type: 'FOLLOWERS' });
+    const [myContributions, setMyContributions] = useState({ posts: [], groups: [], hostels: [] });
+    const [dashboardLoading, setDashboardLoading] = useState(false);
 
     const isVideo = (url) => {
         if (!url) return false;
@@ -62,9 +69,124 @@ export default function Profile() {
         }
 
         if (user) {
-            fetchProfile();
+            fetchMyContributions();
+
+            // Real-time Profile Listener
+            const docRef = doc(db, "profiles", user.uid);
+            const unsubscribe = onSnapshot(docRef, (docSnap) => {
+                if (docSnap.exists()) {
+                    const data = docSnap.data();
+                    setProfile({
+                        displayName: data.displayName || "",
+                        bio: data.bio || "",
+                        photoURL: data.photoURL || null,
+                        services: data.services || [],
+                        gallery: data.gallery || [],
+                        rating: data.rating || "New",
+                        reviewCount: data.reviewCount || 0,
+                        followers: data.followers || 0,
+                        following: data.following || 0
+                    });
+                } else {
+                    // Create initial profile if it doesn't exist
+                    const initialProfile = {
+                        displayName: user.displayName || "Comrade",
+                        bio: "Welcome to my campus profile!",
+                        services: ["Textbook Trade", "Study Groups"],
+                        gallery: [],
+                        photoURL: user.photoURL || null,
+                        rating: "New",
+                        reviewCount: 0,
+                        followers: 0,
+                        following: 0
+                    };
+                    setDoc(docRef, initialProfile);
+                }
+            });
+
+            return () => unsubscribe();
         }
     }, [user, authLoading, router]);
+
+    const fetchMyContributions = async () => {
+        if (!user) return;
+        setDashboardLoading(true);
+        try {
+            const userId = user.uid;
+
+            // Fetch Posts
+            const postsQ = query(collection(db, "sema_posts"), where("creatorId", "==", userId));
+            const postsSnap = await getDocs(postsQ);
+            const posts = postsSnap.docs.map(doc => ({ id: doc.id, ...doc.data(), type: 'POST' }));
+
+            // Fetch Groups
+            const groupsQ = query(collection(db, "study_groups"), where("creatorId", "==", userId));
+            const groupsSnap = await getDocs(groupsQ);
+            const groups = groupsSnap.docs.map(doc => ({ id: doc.id, ...doc.data(), type: 'GROUP' }));
+
+            // Fetch Hostels
+            const hostelsQ = query(collection(db, "hostels"), where("creatorId", "==", userId));
+            const hostelsSnap = await getDocs(hostelsQ);
+            const hostels = hostelsSnap.docs.map(doc => ({ id: doc.id, ...doc.data(), type: 'HOSTEL' }));
+
+            setMyContributions({ posts, groups, hostels });
+        } catch (error) {
+            console.error("Error fetching contributions:", error);
+        } finally {
+            setDashboardLoading(false);
+        }
+    };
+
+    const handleDeleteContribution = (id, coll, type) => {
+        setConfirmState({
+            isOpen: true,
+            title: `Delete ${type}`,
+            message: `Are you sure you want to permanently delete this ${type.toLowerCase()}?`,
+            action: async () => {
+                setConfirmState(prev => ({ ...prev, loading: true }));
+                try {
+                    await deleteDoc(doc(db, coll, id));
+                    setMyContributions(prev => ({
+                        ...prev,
+                        [`${type.toLowerCase()}s`]: prev[`${type.toLowerCase()}s`].filter(item => item.id !== id)
+                    }));
+                    setConfirmState({ isOpen: false });
+                } catch (error) {
+                    console.error("Error deleting item:", error);
+                    alert("Failed to delete item.");
+                    setConfirmState({ isOpen: false });
+                }
+            }
+        });
+    };
+
+    const handleDeleteAccount = () => {
+        setConfirmState({
+            isOpen: true,
+            title: "Delete Account Permanently?",
+            message: "This will securely wipe all your listed Hostels, Study Groups, Sema Posts, and your Profile. This action is irreversible.",
+            action: async () => {
+                setConfirmState(prev => ({ ...prev, loading: true }));
+                try {
+                    // Delete listed contributions implicitly fetched in dashboard
+                    for (const p of myContributions.posts) await deleteDoc(doc(db, "sema_posts", p.id));
+                    for (const g of myContributions.groups) await deleteDoc(doc(db, "study_groups", g.id));
+                    for (const h of myContributions.hostels) await deleteDoc(doc(db, "hostels", h.id));
+
+                    // Delete profile
+                    await deleteDoc(doc(db, "profiles", user.uid));
+
+                    // Delete Auth User
+                    await deleteUser(user);
+                    router.push("/");
+                } catch (error) {
+                    console.error("Account deletion failed:", error);
+                    alert("Account deletion requires recent authentication. Please log out and log back in, then try again.");
+                    setConfirmState({ isOpen: false });
+                }
+            }
+        });
+    };
 
     const fetchProfile = async () => {
         try {
@@ -169,16 +291,6 @@ export default function Profile() {
 
     return (
         <div className={styles.profileWrapper}>
-            <nav style={{ position: "fixed", top: 0, left: 0, right: 0, padding: "16px 32px", background: "rgba(10, 14, 23, 0.8)", backdropFilter: "blur(10px)", zIndex: 100, display: "flex", justifyContent: "space-between", alignItems: "center", borderBottom: "1px solid var(--border)" }}>
-                <Link href="/" style={{ display: "flex", alignItems: "center", gap: "10px", textDecoration: "none" }}>
-                    <Logo size={32} />
-                    <span style={{ fontWeight: 700, color: "white" }}>Campus Connect</span>
-                </Link>
-                <div style={{ display: "flex", gap: "12px" }}>
-                    <Link href="/" style={{ padding: "8px 16px", borderRadius: "100px", color: "white", textDecoration: "none", fontSize: "0.9rem" }}>Home</Link>
-                    <button onClick={() => setIsLogoutModalOpen(true)} style={{ background: "transparent", border: "1px solid var(--border)", color: "white", padding: "8px 16px", borderRadius: "100px", cursor: "pointer" }}>Logout</button>
-                </div>
-            </nav>
 
             {/* Logout Confirmation Modal */}
             <LogoutModal
@@ -189,6 +301,16 @@ export default function Profile() {
                     setIsLogoutModalOpen(false);
                     router.push("/");
                 }}
+            />
+
+            {/* Smart Deletion Confirmation Modal */}
+            <SmartConfirmModal
+                isOpen={confirmState.isOpen}
+                onClose={() => !confirmState.loading && setConfirmState({ isOpen: false })}
+                onConfirm={confirmState.action}
+                title={confirmState.title}
+                message={confirmState.message}
+                loading={confirmState.loading}
             />
 
             <MediaModal
@@ -240,13 +362,30 @@ export default function Profile() {
                         <div className={styles.statItem}>
                             <span className={styles.statValue}>{profile.gallery.length}</span> posts
                         </div>
-                        <div className={styles.statItem}>
+                        <div className={styles.statItem} onClick={() => setSocialModal({ isOpen: true, type: 'FOLLOWERS' })} style={{ cursor: 'pointer' }}>
                             <span className={styles.statValue}>{profile.followers || 0}</span> followers
                         </div>
-                        <div className={styles.statItem}>
+                        <div className={styles.statItem} onClick={() => setSocialModal({ isOpen: true, type: 'FOLLOWING' })} style={{ cursor: 'pointer' }}>
                             <span className={styles.statValue}>{profile.following || 0}</span> following
                         </div>
                     </div>
+
+                    {/* Profile Completion Guide */}
+                    {!isEditing && (profile.gallery.length === 0 || profile.services.length < 3 || !profile.bio) && (
+                        <div className={styles.completionCard}>
+                            <div className={styles.completionHeader}>
+                                <span className={styles.completionTitle}>Finish your Profile</span>
+                                <span className={styles.completionPercent}>
+                                    {Math.round(((profile.gallery.length > 0 ? 1 : 0) + (profile.services.length >= 3 ? 1 : 0) + (profile.bio ? 1 : 0)) / 3 * 100)}%
+                                </span>
+                            </div>
+                            <div className={styles.completionList}>
+                                {!profile.bio && <div className={styles.completionItem}>✍️ Add a compelling bio</div>}
+                                {profile.services.length < 3 && <div className={styles.completionItem}>🛠️ List at least 3 services</div>}
+                                {profile.gallery.length === 0 && <div className={styles.completionItem}>📸 Upload your first gallery photo</div>}
+                            </div>
+                        </div>
+                    )}
 
                     {isEditing ? (
                         <form onSubmit={handleUpdateProfile} className={styles.editForm}>
@@ -333,6 +472,11 @@ export default function Profile() {
                             </div>
 
                             <button type="submit" className={styles.saveBtn}>Save Changes</button>
+                            <div style={{ marginTop: '30px', textAlign: 'center', paddingTop: '20px', borderTop: '1px solid var(--border)' }}>
+                                <button type="button" className={styles.deleteBtn} style={{ background: 'rgba(255, 69, 58, 0.1)', color: '#ff453a', padding: '12px 24px', borderRadius: 'var(--radius-md)' }} onClick={handleDeleteAccount}>
+                                    Delete Account Permanently
+                                </button>
+                            </div>
                         </form>
                     ) : (
                         <div className={styles.bioSection}>
@@ -348,7 +492,9 @@ export default function Profile() {
                             {profile.reviewCount > 0 && (
                                 <div className={styles.ratingContainer}>
                                     <span className={styles.star}>⭐</span>
-                                    <span style={{ fontWeight: 600, color: 'white' }}>{profile.rating}</span>
+                                    <span style={{ fontWeight: 600, color: 'white' }}>
+                                        {(profile.rating / profile.reviewCount).toFixed(1)}
+                                    </span>
                                     <span>({profile.reviewCount} reviews)</span>
                                 </div>
                             )}
@@ -363,6 +509,9 @@ export default function Profile() {
                 </div>
                 <div className={`${styles.tab} ${activeTab === 'REVIEWS' ? styles.activeTab : ''}`} onClick={() => setActiveTab('REVIEWS')}>
                     REVIEWS
+                </div>
+                <div className={`${styles.tab} ${activeTab === 'DASHBOARD' ? styles.activeTab : ''}`} onClick={() => setActiveTab('DASHBOARD')}>
+                    DASHBOARD ⚡
                 </div>
             </div>
 
@@ -389,11 +538,13 @@ export default function Profile() {
                         {profile.gallery.map((img, i) => (
                             <div key={i} className={styles.galleryItem} onClick={() => openMedia(img)}>
                                 {isVideo(img) ? (
-                                    <video src={img} className={styles.itemImage} style={{ pointerEvents: 'none' }} />
+                                    <>
+                                        <video src={img} className={styles.itemImage} muted style={{ pointerEvents: 'none' }} />
+                                        <div className={styles.reelIcon}>▶</div>
+                                    </>
                                 ) : (
                                     <img src={img} alt={`Gallery ${i}`} className={styles.itemImage} style={{ pointerEvents: 'none' }} />
                                 )}
-                                <div className={styles.itemOverlay}>✨</div>
                             </div>
                         ))}
                     </div>
@@ -412,6 +563,74 @@ export default function Profile() {
                     <p>When Comrades rate your services, they will appear here.</p>
                 </div>
             )}
+
+            {activeTab === 'DASHBOARD' && (
+                <div className={styles.dashboardGrid}>
+                    <div className={styles.dashboardSection}>
+                        <div className={styles.sectionHeader}>
+                            <h3>Your Sema Posts 🗣️</h3>
+                            <span className={styles.count}>{myContributions.posts.length}</span>
+                        </div>
+                        <div className={styles.contributionsList}>
+                            {myContributions.posts.map(post => (
+                                <div key={post.id} className={styles.contributionItem}>
+                                    <div className={styles.itemMain}>
+                                        <p className={styles.itemTitle}>{post.content?.substring(0, 40)}...</p>
+                                        <span className={styles.itemSub}>{new Date(post.createdAt?.seconds * 1000).toLocaleDateString()}</span>
+                                    </div>
+                                    <button className={styles.deleteBtn} onClick={() => handleDeleteContribution(post.id, "sema_posts", "POST")}>Delete</button>
+                                </div>
+                            ))}
+                            {myContributions.posts.length === 0 && <p className={styles.empty}>No posts yet.</p>}
+                        </div>
+                    </div>
+
+                    <div className={styles.dashboardSection}>
+                        <div className={styles.sectionHeader}>
+                            <h3>Active Study Groups 📚</h3>
+                            <span className={styles.count}>{myContributions.groups.length}</span>
+                        </div>
+                        <div className={styles.contributionsList}>
+                            {myContributions.groups.map(group => (
+                                <div key={group.id} className={styles.contributionItem}>
+                                    <div className={styles.itemMain}>
+                                        <p className={styles.itemTitle}>{group.unit}: {group.topic}</p>
+                                        <span className={styles.itemSub}>{group.venue}</span>
+                                    </div>
+                                    <button className={styles.deleteBtn} onClick={() => handleDeleteContribution(group.id, "study_groups", "GROUP")}>Delete</button>
+                                </div>
+                            ))}
+                            {myContributions.groups.length === 0 && <p className={styles.empty}>No groups started.</p>}
+                        </div>
+                    </div>
+
+                    <div className={styles.dashboardSection}>
+                        <div className={styles.sectionHeader}>
+                            <h3>Listed Hostels 🏠</h3>
+                            <span className={styles.count}>{myContributions.hostels.length}</span>
+                        </div>
+                        <div className={styles.contributionsList}>
+                            {myContributions.hostels.map(hostel => (
+                                <div key={hostel.id} className={styles.contributionItem}>
+                                    <div className={styles.itemMain}>
+                                        <p className={styles.itemTitle}>{hostel.name}</p>
+                                        <span className={styles.itemSub}>{hostel.location} • {hostel.price}</span>
+                                    </div>
+                                    <button className={styles.deleteBtn} onClick={() => handleDeleteContribution(hostel.id, "hostels", "HOSTEL")}>Delete</button>
+                                </div>
+                            ))}
+                            {myContributions.hostels.length === 0 && <p className={styles.empty}>No hostels listed.</p>}
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            <SocialListModal
+                isOpen={socialModal.isOpen}
+                onClose={() => setSocialModal(prev => ({ ...prev, isOpen: false }))}
+                userId={user?.uid}
+                type={socialModal.type}
+            />
         </div>
     );
 }

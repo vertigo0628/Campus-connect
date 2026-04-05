@@ -10,80 +10,108 @@ export default function Navigation() {
     const { user } = useAuth();
 
     const isAuthPage = pathname === "/login" || pathname === "/signup";
+    if (isAuthPage) return null;
 
-    // Simplified navigation for unauthenticated users
+    // Unauthenticated nav
     if (!user) {
-        if (isAuthPage) return null;
-
         return (
-            <nav className={styles.navContainer}>
-                <div className={styles.desktopNav}>
-                    <div className={styles.logoGroup}>
-                        <Link href="/" className={styles.logoLink}>
-                            <span className={styles.logoIcon}>🎓</span>
-                            <span className={styles.logoText}>Campus Connect</span>
-                        </Link>
-                    </div>
-                    <div className={styles.navLinks}>
-                        <Link href="/login" className={styles.navLink}>Log In</Link>
-                        <Link href="/signup" className={styles.navBtn}>Sign Up</Link>
+            <nav className={styles.nav}>
+                <div className={styles.inner}>
+                    <Link href="/" className={styles.brand}>
+                        <img src="/brand/logo.png" alt="Campus Connect Icon" className={styles.brandIcon} />
+                        <span className={styles.brandText}>Campus<span className={styles.brandAccent}>Connect</span></span>
+                    </Link>
+                    <div className={styles.authLinks}>
+                        <Link href="/login" className={styles.loginLink}>Log in</Link>
+                        <Link href="/signup" className={styles.signupBtn}>Sign up</Link>
                     </div>
                 </div>
             </nav>
         );
     }
 
-    if (isAuthPage) return null;
-
     const navItems = [
-        { label: "Home", path: "/", icon: "🏠" },
-        { label: "Discover", path: "/discover", icon: "🔍" },
-        { label: "Profile", path: "/profile", icon: "👤" },
+        {
+            label: "Home", path: "/",
+            icon: <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z" /><polyline points="9 22 9 12 15 12 15 22" /></svg>,
+            iconFilled: <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z" /></svg>
+        },
+        {
+            label: "Feed", path: "/sema",
+            icon: <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="3" width="18" height="18" rx="2" /><line x1="3" y1="9" x2="21" y2="9" /><line x1="9" y1="21" x2="9" y2="9" /></svg>,
+            iconFilled: <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><rect x="3" y="3" width="18" height="18" rx="2" /></svg>
+        },
+        {
+            label: "Discover", path: "/discover",
+            icon: <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" /></svg>,
+            iconFilled: <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" strokeWidth="1"><circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" stroke="currentColor" strokeWidth="3" /></svg>
+        },
+        {
+            label: "DMs", path: "/messages",
+            icon: <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z" /></svg>,
+            iconFilled: <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z" /></svg>
+        },
+        {
+            label: "Profile", path: "/profile",
+            icon: <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2" /><circle cx="12" cy="7" r="4" /></svg>,
+            iconFilled: <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2" /><circle cx="12" cy="7" r="4" /></svg>
+        },
     ];
 
-    return (
-        <nav className={styles.navContainer}>
-            {/* Desktop Top Bar */}
-            <div className={styles.desktopNav}>
-                <div className={styles.logoGroup}>
-                    <span className={styles.logoIcon}>🎓</span>
-                    <span className={styles.logoText}>Campus Connect</span>
-                </div>
-                <div className={styles.navLinks}>
-                    {navItems.map((item) => (
-                        <Link
-                            key={item.path}
-                            href={item.path}
-                            className={`${styles.navLink} ${pathname === item.path ? styles.active : ""}`}
-                        >
-                            {item.label}
-                        </Link>
-                    ))}
-                </div>
-                <div className={styles.userSection}>
-                    <Link href="/profile">
-                        <img
-                            src={user.photoURL || "https://ui-avatars.com/api/?name=" + (user.displayName || "User")}
-                            alt="Profile"
-                            className={styles.avatar}
-                        />
-                    </Link>
-                </div>
-            </div>
+    const isActive = (path) => {
+        if (path === "/") return pathname === "/";
+        return pathname.startsWith(path);
+    };
 
-            {/* Mobile Bottom Bar */}
-            <div className={styles.mobileNav}>
+    return (
+        <>
+            {/* Desktop Top Nav */}
+            <nav className={styles.nav}>
+                <div className={styles.inner}>
+                    <Link href="/" className={styles.brand}>
+                        <img src="/brand/logo.png" alt="Campus Connect Icon" className={styles.brandIcon} />
+                        <span className={styles.brandText}>Campus<span className={styles.brandAccent}>Connect</span></span>
+                    </Link>
+
+                    <div className={styles.desktopLinks}>
+                        {navItems.map((item) => (
+                            <Link
+                                key={item.path}
+                                href={item.path}
+                                className={`${styles.desktopLink} ${isActive(item.path) ? styles.desktopActive : ""}`}
+                                title={item.label}
+                            >
+                                {isActive(item.path) ? item.iconFilled : item.icon}
+                            </Link>
+                        ))}
+                    </div>
+
+                    <div className={styles.desktopRight}>
+                        <Link href="/profile" className={styles.avatarLink}>
+                            <img
+                                src={user.photoURL || `https://ui-avatars.com/api/?name=${user.displayName || "U"}&background=1c1c1e&color=f5f5f7`}
+                                alt="You"
+                                className={`${styles.navAvatar} ${isActive("/profile") ? styles.navAvatarActive : ""}`}
+                            />
+                        </Link>
+                    </div>
+                </div>
+            </nav>
+
+            {/* Mobile Bottom Tab Bar */}
+            <nav className={styles.mobileBar}>
                 {navItems.map((item) => (
                     <Link
                         key={item.path}
                         href={item.path}
-                        className={`${styles.mobileTab} ${pathname === item.path ? styles.mobileActive : ""}`}
+                        className={`${styles.mobileTab} ${isActive(item.path) ? styles.mobileTabActive : ""}`}
                     >
-                        <span className={styles.tabIcon}>{item.icon}</span>
-                        <span className={styles.tabLabel}>{item.label}</span>
+                        <span className={styles.tabIconWrap}>
+                            {isActive(item.path) ? item.iconFilled : item.icon}
+                        </span>
                     </Link>
                 ))}
-            </div>
-        </nav>
+            </nav>
+        </>
     );
 }

@@ -1,16 +1,9 @@
-import { Geist, Geist_Mono } from "next/font/google";
+// Replacing Google Fonts with system fallback for build stability in restricted environments
 import "./globals.css";
 import ServiceWorkerRegistrar from "@/components/ServiceWorkerRegistrar";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
+const geistSans = { variable: "--font-geist-sans" };
+const geistMono = { variable: "--font-geist-mono" };
 
 export const viewport = {
   themeColor: "#006633",
@@ -19,33 +12,47 @@ export const viewport = {
 };
 
 export const metadata = {
-  title: "Campus Connect Kenya",
+  title: {
+    default: "Campus Connect Kenya | The #1 Student Network",
+    template: "%s | Campus Connect Kenya"
+  },
   description:
-    "One platform for everything in campus — trade textbooks, find hostels, join study groups, access M-Pesa payments, and stay safe with emergency SOS. Built by students, for students.",
+    "The exclusive social & utility platform for Kenyan university students. Trade services, find roommates, join study groups, and stay safe with SOS alerts. Built for the MUST community and beyond.",
   keywords: [
-    "campus",
-    "university",
-    "Kenya",
-    "students",
-    "marketplace",
-    "study groups",
-    "hostel finder",
+    "campus connect kenya",
+    "must university social network",
+    "kenyan student marketplace",
+    "student services kenya",
+    "emergency sos university",
+    "campus commerce",
   ],
+  authors: [{ name: "The Masterminds (Group 5)" }],
+  creator: "vertiGO",
+  publisher: "Campus Connect Team",
   appleWebApp: {
     capable: true,
     statusBarStyle: "black-translucent",
-    title: "CampusConnect",
+    title: "Campus Connect",
   },
   openGraph: {
     title: "Campus Connect Kenya",
-    description:
-      "The all-in-one platform for Kenyan university students.",
+    description: "Connect, Trade, and Thrive in your university journey.",
+    url: "https://campus-connect-ke.vercel.app",
+    siteName: "Campus Connect Kenya",
+    locale: "en_KE",
     type: "website",
   },
+  twitter: {
+    card: "summary_large_image",
+    title: "Campus Connect Kenya",
+    description: "The official network for Kenyan university comrades.",
+  }
 };
 
 import { AuthProvider } from "@/context/AuthContext";
 import Navigation from "@/components/Navigation";
+import EmergencySOS from "@/components/EmergencySOS";
+import SemaPortal from "@/components/SemaPortal";
 
 export default function RootLayout({ children }) {
   return (
@@ -57,6 +64,8 @@ export default function RootLayout({ children }) {
           <div className="main-content">
             {children}
           </div>
+          <EmergencySOS />
+          <SemaPortal />
         </AuthProvider>
       </body>
     </html>

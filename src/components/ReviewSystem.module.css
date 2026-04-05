@@ -1,0 +1,142 @@
+.reviewContainer {
+    margin-top: 40px;
+    padding: 24px;
+    background: rgba(255, 255, 255, 0.02);
+    border-radius: 24px;
+    border: 1px solid var(--border);
+}
+
+.reviewHeader {
+    margin-bottom: 30px;
+}
+
+.reviewHeader h3 {
+    font-size: 1.4rem;
+    color: #fff;
+    margin-bottom: 4px;
+}
+
+.reviewHeader p {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+}
+
+.reviewForm {
+    background: rgba(0, 102, 51, 0.05);
+    padding: 20px;
+    border-radius: 16px;
+    border: 1px solid rgba(0, 209, 102, 0.2);
+    margin-bottom: 40px;
+}
+
+.reviewForm h4 {
+    margin-bottom: 16px;
+    font-size: 1rem;
+    color: #00d166;
+}
+
+.starRating {
+    display: flex;
+    flex-direction: row-reverse;
+    justify-content: flex-end;
+    gap: 8px;
+    margin-bottom: 16px;
+}
+
+.starRating button {
+    background: none;
+    border: none;
+    font-size: 2rem;
+    cursor: pointer;
+    padding: 0;
+    transition: color 0.2s;
+}
+
+.starActive {
+    color: #ffd700;
+}
+
+.starInactive {
+    color: #333;
+}
+
+.reviewForm textarea {
+    width: 100%;
+    background: #111;
+    border: 1px solid #333;
+    border-radius: 12px;
+    padding: 14px;
+    color: #fff;
+    font-family: inherit;
+    min-height: 80px;
+    resize: none;
+    margin-bottom: 16px;
+}
+
+.reviewForm button[type="submit"] {
+    background: #00d166;
+    color: #000;
+    border: none;
+    padding: 10px 24px;
+    border-radius: 100px;
+    font-weight: 800;
+    cursor: pointer;
+    transition: transform 0.2s;
+}
+
+.reviewForm button:hover {
+    transform: scale(1.05);
+}
+
+.reviewList {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.reviewCard {
+    padding: 20px;
+    background: #0d0d0d;
+    border-radius: 16px;
+    border: 1px solid #1a1a1a;
+}
+
+.reviewMeta {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 10px;
+}
+
+.authorGroup {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.authorName {
+    font-weight: 700;
+    color: #fff;
+}
+
+.stars {
+    color: #ffd700;
+    font-size: 0.9rem;
+}
+
+.time {
+    color: #555;
+    font-size: 0.8rem;
+}
+
+.reviewText {
+    color: #aaa;
+    line-height: 1.5;
+    font-size: 0.95rem;
+}
+
+.infoText {
+    text-align: center;
+    color: #666;
+    padding: 40px 0;
+}

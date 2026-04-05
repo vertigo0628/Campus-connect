@@ -1,158 +1,194 @@
-.navContainer {
-    z-index: 1000;
-}
-
-/* ===== Desktop Navigation ===== */
-.desktopNav {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 0 40px;
-    height: 70px;
+/* ===== Top Nav (Desktop) ===== */
+.nav {
     position: fixed;
     top: 0;
     left: 0;
     right: 0;
-    background: rgba(10, 10, 10, 0.8);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    height: var(--nav-height);
+    background: rgba(0, 0, 0, 0.85);
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    border-bottom: 1px solid var(--border);
     z-index: 1000;
-}
-
-.logoGroup {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-}
-
-.logoIcon {
-    font-size: 1.5rem;
-}
-
-.logoText {
-    font-weight: 800;
-    font-size: 1.25rem;
-    letter-spacing: -0.5px;
-    background: linear-gradient(135deg, var(--primary-light), #fff);
-    -webkit-background-clip: text;
-    background-clip: text;
-    -webkit-text-fill-color: transparent;
-}
-
-.navLinks {
-    display: flex;
-    gap: 32px;
-}
-
-.navLink {
-    color: var(--text-secondary);
-    text-decoration: none;
-    font-weight: 600;
-    font-size: 0.95rem;
-    transition: all 0.2s ease;
-    padding: 8px 12px;
-    border-radius: 8px;
-}
-
-.navLink:hover {
-    color: var(--text-primary);
-    background: rgba(255, 255, 255, 0.05);
-}
-
-.navBtn {
-    background: linear-gradient(135deg, var(--primary), var(--primary-light));
-    color: white !important;
-    padding: 8px 20px;
-    border-radius: var(--radius-full);
-    font-weight: 700;
-    text-decoration: none;
-    transition: all 0.3s ease;
-    box-shadow: 0 4px 15px rgba(0, 102, 51, 0.3);
-}
-
-.navBtn:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(0, 102, 51, 0.4);
-    opacity: 0.9;
-}
-
-.active {
-    color: var(--primary-light) !important;
-}
-
-.userSection {
-    display: flex;
-    align-items: center;
-}
-
-.avatar {
-    width: 36px;
-    height: 36px;
-    border-radius: 50%;
-    border: 2px solid var(--border);
-    transition: transform 0.2s ease;
-}
-
-.avatar:hover {
-    transform: scale(1.1);
-    border-color: var(--primary);
-}
-
-/* ===== Mobile Navigation ===== */
-.mobileNav {
     display: none;
 }
 
+.inner {
+    max-width: var(--content-max-width);
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 100%;
+    padding: 0 20px;
+}
+
+/* Brand */
+.brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    text-decoration: none;
+}
+
+.brandIcon {
+    width: 32px;
+    height: 32px;
+    border-radius: 10px;
+    object-fit: cover;
+}
+
+.brandText {
+    font-weight: 700;
+    font-size: 1.1rem;
+    color: var(--text-primary);
+    letter-spacing: -0.5px;
+}
+
+.brandAccent {
+    color: var(--primary);
+}
+
+/* Desktop icon links */
+.desktopLinks {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.desktopLink {
+    width: 44px;
+    height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--radius-md);
+    color: var(--text-secondary);
+    transition: all 0.2s ease;
+}
+
+.desktopLink:hover {
+    color: var(--text-primary);
+    background: var(--surface-hover);
+}
+
+.desktopActive {
+    color: var(--text-primary) !important;
+}
+
+/* Desktop right */
+.desktopRight {
+    display: flex;
+    align-items: center;
+}
+
+.avatarLink {
+    display: flex;
+}
+
+.navAvatar {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    border: 2px solid transparent;
+    transition: all 0.2s ease;
+    object-fit: cover;
+}
+
+.navAvatarActive {
+    border-color: var(--text-primary);
+}
+
+.navAvatar:hover {
+    border-color: var(--text-secondary);
+}
+
+/* Auth links */
+.authLinks {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.loginLink {
+    color: var(--text-link);
+    font-weight: 600;
+    font-size: 0.9rem;
+}
+
+.signupBtn {
+    background: var(--primary);
+    color: #fff;
+    font-weight: 700;
+    font-size: 0.85rem;
+    padding: 8px 20px;
+    border-radius: var(--radius-sm);
+    border: none;
+    transition: all 0.2s ease;
+}
+
+.signupBtn:hover {
+    background: var(--primary-dark);
+}
+
+/* ===== Mobile Bottom Bar ===== */
+.mobileBar {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: var(--mobile-tab-height);
+    background: rgba(0, 0, 0, 0.92);
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    border-top: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-around;
+    padding-bottom: env(safe-area-inset-bottom);
+    z-index: 1000;
+}
+
+.mobileTab {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    color: var(--text-tertiary);
+    transition: color 0.15s ease;
+    text-decoration: none;
+}
+
+.mobileTabActive {
+    color: var(--text-primary);
+}
+
+.tabIconWrap {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+}
+
+/* ===== Responsive ===== */
+@media (min-width: 769px) {
+    .nav {
+        display: block;
+    }
+
+    .mobileBar {
+        display: none;
+    }
+}
+
 @media (max-width: 768px) {
-    .desktopNav {
+    .nav {
         display: none;
     }
 
-    .mobileNav {
+    .mobileBar {
         display: flex;
-        justify-content: space-around;
-        align-items: center;
-        position: fixed;
-        bottom: 0;
-        left: 0;
-        right: 0;
-        height: 70px;
-        background: rgba(15, 15, 15, 0.85);
-        backdrop-filter: blur(20px);
-        -webkit-backdrop-filter: blur(20px);
-        border-top: 1px solid rgba(255, 255, 255, 0.1);
-        padding-bottom: env(safe-area-inset-bottom);
-        z-index: 1000;
-    }
-
-    .mobileTab {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        gap: 4px;
-        text-decoration: none;
-        color: var(--text-secondary);
-        flex: 1;
-        transition: all 0.2s ease;
-    }
-
-    .tabIcon {
-        font-size: 1.25rem;
-    }
-
-    .tabLabel {
-        font-size: 0.7rem;
-        font-weight: 600;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-    }
-
-    .mobileActive {
-        color: var(--primary-light);
-    }
-
-    .mobileActive .tabIcon {
-        transform: translateY(-2px);
     }
 }

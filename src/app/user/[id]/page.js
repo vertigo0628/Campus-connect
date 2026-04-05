@@ -2,13 +2,15 @@
 
 import { useEffect, useState, use } from "react";
 import { useRouter } from "next/navigation";
-import { doc, getDoc, collection, addDoc, query, where, getDocs, updateDoc, serverTimestamp, orderBy } from "firebase/firestore";
+import { doc, getDoc, collection, setDoc, deleteDoc, query, where, getDocs, updateDoc, serverTimestamp, orderBy, increment } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { useAuth } from "@/context/AuthContext";
 import styles from "@/app/profile/profile.module.css";
 import Link from "next/link";
 import Logo from "@/components/Logo";
 import MediaModal from "@/components/MediaModal";
+import ReviewSystem from "@/components/ReviewSystem";
+import SocialListModal from "@/components/SocialListModal";
 
 export default function PublicProfile({ params }) {
     const unwrappedParams = use(params);
@@ -17,19 +19,13 @@ export default function PublicProfile({ params }) {
     const router = useRouter();
 
     const [profile, setProfile] = useState(null);
-    const [reviews, setReviews] = useState([]);
     const [loading, setLoading] = useState(true);
     const [activeTab, setActiveTab] = useState('POSTS');
-    const [isMenuOpen, setIsMenuOpen] = useState(false);
-
-    // Review Form State
-    const [rating, setRating] = useState(5);
-    const [comment, setComment] = useState("");
-    const [submittingReview, setSubmittingReview] = useState(false);
-    const [reviewError, setReviewError] = useState("");
-
     // Media View State
     const [mediaModal, setMediaModal] = useState({ isOpen: false, src: "", type: "image" });
+    const [socialModal, setSocialModal] = useState({ isOpen: false, type: 'FOLLOWERS' });
+    const [isFollowing, setIsFollowing] = useState(false);
+    const [followLoading, setFollowLoading] = useState(false);
 
     const isVideo = (url) => {
         if (!url) return false;
@@ -56,31 +52,23 @@ export default function PublicProfile({ params }) {
     useEffect(() => {
         if (!targetUserId) return;
 
-        const fetchProfileAndReviews = async () => {
+        const fetchProfile = async () => {
             try {
-                // 1. Fetch Profile
                 const docRef = doc(db, "profiles", targetUserId);
                 const docSnap = await getDoc(docRef);
 
                 if (docSnap.exists()) {
                     setProfile(docSnap.data());
                 } else {
-                    setProfile(null); // User not found
+                    setProfile(null);
                 }
 
-                // 2. Fetch Reviews
-                const reviewsRef = collection(db, "reviews");
-                const q = query(reviewsRef, where("targetUserId", "==", targetUserId));
-                const querySnapshot = await getDocs(q);
-
-                const loadedReviews = [];
-                querySnapshot.forEach((doc) => {
-                    loadedReviews.push({ id: doc.id, ...doc.data() });
-                });
-                // Sort client-side if needed since we didn't index orderBy on multiple fields yet
-                loadedReviews.sort((a, b) => (b.timestamp?.toMillis() || 0) - (a.timestamp?.toMillis() || 0));
-                setReviews(loadedReviews);
-
+                // Check if already following
+                if (currentUser) {
+                    const followRef = doc(db, "profiles", targetUserId, "followers", currentUser.uid);
+                    const followSnap = await getDoc(followRef);
+                    setIsFollowing(followSnap.exists());
+                }
             } catch (error) {
                 console.error("Error fetching public profile:", error);
             } finally {
@@ -88,64 +76,59 @@ export default function PublicProfile({ params }) {
             }
         };
 
-        fetchProfileAndReviews();
-    }, [targetUserId]);
+        fetchProfile();
+    }, [targetUserId, currentUser]);
 
-    const handleReviewSubmit = async (e) => {
-        e.preventDefault();
-        setReviewError("");
+    const handleFollowToggle = async () => {
         if (!currentUser) {
-            setReviewError("You must be logged in to leave a review.");
-            return;
-        }
-        if (currentUser.uid === targetUserId) {
-            setReviewError("You cannot review yourself.");
-            return;
-        }
-        if (!comment.trim()) {
-            setReviewError("Please provide a comment.");
+            router.push('/login');
             return;
         }
 
-        setSubmittingReview(true);
+        setFollowLoading(true);
         try {
-            // 1. Add Review to Collection
-            const newReview = {
-                targetUserId,
-                reviewerId: currentUser.uid,
-                reviewerName: currentUser.displayName || currentUser.email.split('@')[0],
-                reviewerPhoto: currentUser.photoURL || null,
-                rating,
-                comment: comment.trim(),
-                timestamp: serverTimestamp()
-            };
+            const followerRef = doc(db, "profiles", targetUserId, "followers", currentUser.uid);
+            const followingRef = doc(db, "profiles", currentUser.uid, "following", targetUserId);
+            const targetProfileRef = doc(db, "profiles", targetUserId);
+            const myProfileRef = doc(db, "profiles", currentUser.uid);
 
-            await addDoc(collection(db, "reviews"), newReview);
+            // Ensure my profile exists before following/unfollowing
+            const myProfileSnap = await getDoc(myProfileRef);
+            if (!myProfileSnap.exists()) {
+                await setDoc(myProfileRef, {
+                    displayName: currentUser.displayName || "Comrade",
+                    bio: "Welcome to my campus profile!",
+                    services: ["Textbook Trade", "Study Groups"],
+                    gallery: [],
+                    photoURL: currentUser.photoURL || null,
+                    rating: "New",
+                    reviewCount: 0,
+                    followers: 0,
+                    following: 0
+                });
+            }
 
-            // 2. Update Target User's Profile Stats
-            const currentCount = profile.reviewCount || 0;
-            const currentRating = profile.rating === "New" ? 0 : parseFloat(profile.rating);
-
-            const newCount = currentCount + 1;
-            const totalScore = (currentRating * currentCount) + rating;
-            const newAverageRating = (totalScore / newCount).toFixed(1);
-
-            await updateDoc(doc(db, "profiles", targetUserId), {
-                reviewCount: newCount,
-                rating: newAverageRating
-            });
-
-            // Update local state to reflect new review instantly
-            setReviews([{ ...newReview, timestamp: { toMillis: () => Date.now() } }, ...reviews]);
-            setProfile(prev => ({ ...prev, reviewCount: newCount, rating: newAverageRating }));
-            setComment("");
-            setRating(5);
-
-        } catch (err) {
-            console.error("Error submitting review:", err);
-            setReviewError("Failed to submit review. Try again.");
+            if (isFollowing) {
+                // UNFOLLOW
+                await deleteDoc(followerRef);
+                await deleteDoc(followingRef);
+                await updateDoc(targetProfileRef, { followers: increment(-1) });
+                await updateDoc(myProfileRef, { following: increment(-1) });
+                setIsFollowing(false);
+                setProfile(prev => ({ ...prev, followers: (prev.followers || 1) - 1 }));
+            } else {
+                // FOLLOW
+                await setDoc(followerRef, { timestamp: serverTimestamp() });
+                await setDoc(followingRef, { timestamp: serverTimestamp() });
+                await updateDoc(targetProfileRef, { followers: increment(1) });
+                await updateDoc(myProfileRef, { following: increment(1) });
+                setIsFollowing(true);
+                setProfile(prev => ({ ...prev, followers: (prev.followers || 0) + 1 }));
+            }
+        } catch (error) {
+            console.error("Error toggling follow:", error);
         } finally {
-            setSubmittingReview(false);
+            setFollowLoading(false);
         }
     };
 
@@ -168,15 +151,6 @@ export default function PublicProfile({ params }) {
     return (
         <div className={styles.profileWrapper}>
             {/* Minimal Nav for Public View */}
-            <nav style={{ position: 'absolute', top: 24, left: 24, right: 24, display: 'flex', justifyContent: 'space-between', alignItems: 'center', zIndex: 10 }}>
-                <Link href="/" style={{ display: 'flex', alignItems: 'center', gap: '8px', textDecoration: 'none', color: 'white' }}>
-                    <Logo size={24} />
-                    <span style={{ fontWeight: 'bold' }}>Campus Connect</span>
-                </Link>
-                {currentUser && currentUser.uid !== targetUserId && (
-                    <Link href="/profile" style={{ color: 'var(--primary-light)', textDecoration: 'none', fontSize: '0.9rem', fontWeight: 600 }}>Back to My Profile</Link>
-                )}
-            </nav>
 
             <header className={styles.header}>
                 <div className={styles.avatarSection}>
@@ -195,16 +169,61 @@ export default function PublicProfile({ params }) {
                 <div className={styles.infoSection}>
                     <div className={styles.topRow}>
                         <h1 className={styles.username}>{profile.displayName}</h1>
+                        <div style={{ display: 'flex', gap: '8px', alignItems: 'center', flexWrap: 'wrap' }}>
+                            {currentUser && currentUser.uid !== targetUserId && (
+                                <>
+                                    <button
+                                        className={isFollowing ? styles.unfollowBtn : styles.followBtn}
+                                        onClick={handleFollowToggle}
+                                        disabled={followLoading}
+                                    >
+                                        {followLoading ? "..." : (isFollowing ? "Unfollow" : "Follow")}
+                                    </button>
+                                    <Link
+                                        href={`/messages?to=${targetUserId}&name=${encodeURIComponent(profile.displayName || "Comrade")}`}
+                                        style={{
+                                            padding: '8px 16px',
+                                            background: 'rgba(255, 255, 255, 0.08)',
+                                            border: '1px solid rgba(255, 255, 255, 0.15)',
+                                            borderRadius: '8px',
+                                            color: '#fff',
+                                            fontSize: '0.85rem',
+                                            fontWeight: '600',
+                                            textDecoration: 'none',
+                                            display: 'inline-block',
+                                            transition: 'all 0.2s'
+                                        }}
+                                        onMouseOver={(e) => {
+                                            e.currentTarget.style.backgroundColor = 'var(--must-gold, #ffb700)';
+                                            e.currentTarget.style.color = '#000';
+                                            e.currentTarget.style.borderColor = 'var(--must-gold, #ffb700)';
+                                        }}
+                                        onMouseOut={(e) => {
+                                            e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.08)';
+                                            e.currentTarget.style.color = '#fff';
+                                            e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.15)';
+                                        }}
+                                    >
+                                        Message
+                                    </Link>
+                                </>
+                            )}
+                            {!currentUser && (
+                                <button className={styles.followBtn} onClick={() => router.push('/login')}>
+                                    Follow
+                                </button>
+                            )}
+                        </div>
                     </div>
 
                     <div className={styles.statsRow}>
                         <div className={styles.statItem}>
                             <span className={styles.statValue}>{profile.gallery?.length || 0}</span> posts
                         </div>
-                        <div className={styles.statItem}>
+                        <div className={styles.statItem} onClick={() => setSocialModal({ isOpen: true, type: 'FOLLOWERS' })} style={{ cursor: 'pointer' }}>
                             <span className={styles.statValue}>{profile.followers || 0}</span> followers
                         </div>
-                        <div className={styles.statItem}>
+                        <div className={styles.statItem} onClick={() => setSocialModal({ isOpen: true, type: 'FOLLOWING' })} style={{ cursor: 'pointer' }}>
                             <span className={styles.statValue}>{profile.following || 0}</span> following
                         </div>
                     </div>
@@ -222,7 +241,9 @@ export default function PublicProfile({ params }) {
                         {profile.reviewCount > 0 && (
                             <div className={styles.ratingContainer}>
                                 <span className={styles.star}>⭐</span>
-                                <span style={{ fontWeight: 600, color: 'white' }}>{profile.rating}</span>
+                                <span style={{ fontWeight: 600, color: 'white' }}>
+                                    {(profile.rating / profile.reviewCount).toFixed(1)}
+                                </span>
                                 <span>({profile.reviewCount} reviews)</span>
                             </div>
                         )}
@@ -245,7 +266,10 @@ export default function PublicProfile({ params }) {
                         {profile.gallery?.map((img, i) => (
                             <div key={i} className={styles.galleryItem} style={{ cursor: 'pointer' }} onClick={() => openMedia(img)}>
                                 {isVideo(img) ? (
-                                    <video src={img} className={styles.itemImage} muted style={{ pointerEvents: 'none' }} />
+                                    <>
+                                        <video src={img} className={styles.itemImage} muted style={{ pointerEvents: 'none' }} />
+                                        <div className={styles.reelIcon}>▶</div>
+                                    </>
                                 ) : (
                                     <img src={img} alt={`Gallery ${i}`} className={styles.itemImage} style={{ pointerEvents: 'none' }} />
                                 )}
@@ -262,75 +286,7 @@ export default function PublicProfile({ params }) {
             )}
 
             {activeTab === 'REVIEWS' && (
-                <div style={{ marginTop: '20px' }}>
-
-                    {/* Leave a Review Form (Only for other logged in users) */}
-                    {currentUser && currentUser.uid !== targetUserId && (
-                        <div style={{ background: 'var(--surface)', padding: '20px', borderRadius: '8px', marginBottom: '30px' }}>
-                            <h3 style={{ marginBottom: '16px', fontSize: '1.1rem' }}>Leave a Review for {profile.displayName}</h3>
-                            {reviewError && <p style={{ color: '#ff4d4f', fontSize: '0.85rem', marginBottom: '12px' }}>{reviewError}</p>}
-                            <form onSubmit={handleReviewSubmit}>
-                                <div style={{ marginBottom: '16px' }}>
-                                    <label style={{ display: 'block', fontSize: '0.85rem', color: 'var(--text-secondary)', marginBottom: '8px' }}>Rating (1-5 Stars)</label>
-                                    <select
-                                        value={rating}
-                                        onChange={(e) => setRating(Number(e.target.value))}
-                                        className={styles.input}
-                                        style={{ width: '100px' }}
-                                    >
-                                        <option value={5}>5 ⭐</option>
-                                        <option value={4}>4 ⭐</option>
-                                        <option value={3}>3 ⭐</option>
-                                        <option value={2}>2 ⭐</option>
-                                        <option value={1}>1 ⭐</option>
-                                    </select>
-                                </div>
-                                <div style={{ marginBottom: '16px' }}>
-                                    <label style={{ display: 'block', fontSize: '0.85rem', color: 'var(--text-secondary)', marginBottom: '8px' }}>Your Review</label>
-                                    <textarea
-                                        className={styles.textarea}
-                                        placeholder="Describe your experience with their services..."
-                                        value={comment}
-                                        onChange={(e) => setComment(e.target.value)}
-                                        required
-                                    />
-                                </div>
-                                <button type="submit" className={styles.saveBtn} disabled={submittingReview}>
-                                    {submittingReview ? "Submitting..." : "Post Review"}
-                                </button>
-                            </form>
-                        </div>
-                    )}
-
-                    {/* Display Reviews */}
-                    <div>
-                        {reviews.length === 0 ? (
-                            <div style={{ textAlign: "center", padding: "40px", color: "var(--text-secondary)" }}>
-                                <h2>No Reviews Yet</h2>
-                                <p>Be the first to leave a review!</p>
-                            </div>
-                        ) : (
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-                                {reviews.map(review => (
-                                    <div key={review.id} style={{ background: 'var(--surface)', padding: '16px', borderRadius: '8px', border: '1px solid var(--border)' }}>
-                                        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
-                                            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                                                <img
-                                                    src={review.reviewerPhoto || "https://ui-avatars.com/api/?name=" + review.reviewerName}
-                                                    alt={review.reviewerName}
-                                                    style={{ width: '30px', height: '30px', borderRadius: '50%', objectFit: 'cover' }}
-                                                />
-                                                <span style={{ fontWeight: 600, fontSize: '0.9rem' }}>{review.reviewerName}</span>
-                                            </div>
-                                            <span style={{ color: '#fbbc05', fontWeight: 'bold' }}>{review.rating} ⭐</span>
-                                        </div>
-                                        <p style={{ color: 'var(--text-primary)', fontSize: '0.95rem', lineHeight: '1.4', marginTop: '8px' }}>{review.comment}</p>
-                                    </div>
-                                ))}
-                            </div>
-                        )}
-                    </div>
-                </div>
+                <ReviewSystem targetUserId={targetUserId} targetUserName={profile.displayName} />
             )}
 
             <MediaModal
@@ -338,6 +294,13 @@ export default function PublicProfile({ params }) {
                 src={mediaModal.src}
                 type={mediaModal.type}
                 onClose={closeMedia}
+            />
+
+            <SocialListModal
+                isOpen={socialModal.isOpen}
+                onClose={() => setSocialModal(prev => ({ ...prev, isOpen: false }))}
+                userId={targetUserId}
+                type={socialModal.type}
             />
         </div>
     );
