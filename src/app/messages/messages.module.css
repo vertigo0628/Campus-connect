@@ -1,7 +1,10 @@
 /* ===== Messages Layout ===== */
 .wrapper {
-    min-height: 100dvh;
+    height: 100dvh;
+    overflow: hidden;
     background: var(--bg-primary);
+    display: flex;
+    flex-direction: column;
 }
 
 .layout {
@@ -134,8 +137,8 @@
     gap: 12px;
     padding: 14px 16px;
     border-bottom: 1px solid var(--border);
-    background: rgba(0, 0, 0, 0.5);
-    backdrop-filter: blur(12px);
+    background: var(--bg-primary);
+    flex-shrink: 0;
 }
 
 .backBtn {
@@ -271,6 +274,8 @@
     padding: 12px 16px;
     border-top: 1px solid var(--border);
     background: var(--bg-secondary);
+    flex-shrink: 0;
+    z-index: 10;
 }
 
 .msgTextField {
@@ -330,9 +335,13 @@
 
 /* ===== Mobile ===== */
 @media (max-width: 768px) {
+    .wrapper {
+        height: calc(100dvh - var(--mobile-tab-height));
+    }
+
     .layout {
         border: none;
-        height: calc(100dvh - var(--mobile-tab-height));
+        height: 100%;
     }
 
     .sidebar {
@@ -345,6 +354,10 @@
 
     .backBtn {
         display: flex;
+    }
+
+    .msgInput {
+        padding-bottom: max(12px, env(safe-area-inset-bottom));
     }
 }
 

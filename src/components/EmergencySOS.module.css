@@ -1,16 +1,17 @@
 .sosTrigger {
     position: fixed;
     bottom: calc(var(--mobile-tab-height) + env(safe-area-inset-bottom, 16px) + 85px);
-    right: 20px;
+    left: 20px;
     background: #ff4d4f;
     color: white;
     border: none;
     border-radius: 50px;
-    padding: 12px 20px;
+    padding: 10px 16px;
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 6px;
     font-weight: 700;
+    font-size: 0.8rem;
     box-shadow: 0 4px 20px rgba(255, 77, 79, 0.4);
     cursor: pointer;
     z-index: 999;
