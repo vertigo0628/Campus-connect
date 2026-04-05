@@ -11,6 +11,10 @@
     display: flex;
     gap: 12px;
     padding: 0 0 16px 0;
+    position: sticky;
+    top: 0;
+    z-index: 20;
+    background: var(--bg-primary);
 }
 
 .hubNavBtn {
@@ -346,6 +350,10 @@
     }
 
     .searchHeader {
+        top: var(--nav-height);
+    }
+
+    .hubNav {
         top: var(--nav-height);
     }
 }

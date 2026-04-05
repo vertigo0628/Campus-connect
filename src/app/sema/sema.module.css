@@ -13,6 +13,10 @@
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
     scrollbar-width: none;
+    position: sticky;
+    top: 0;
+    z-index: 20;
+    background: var(--bg-primary);
 }
 
 .categoryBar::-webkit-scrollbar {
@@ -48,6 +52,10 @@
     display: flex;
     border-bottom: 1px solid var(--border);
     margin-bottom: 4px;
+    position: sticky;
+    top: 42px;
+    z-index: 19;
+    background: var(--bg-primary);
 }
 
 .feedTab {
