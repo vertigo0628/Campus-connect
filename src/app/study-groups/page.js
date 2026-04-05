@@ -79,10 +79,12 @@ export default function StudyGroupsPage() {
             <Navigation />
             <div className={styles.content}>
                 {/* Hub Navigation */}
-                <div className={styles.hubNav}>
-                    <Link href="/discover" className={styles.hubNavBtn}>Comrades</Link>
-                    <Link href="/study-groups" className={`${styles.hubNavBtn} ${styles.hubNavBtnActive}`}>Study Groups</Link>
-                    <Link href="/hostels" className={styles.hubNavBtn}>Hostels</Link>
+                <div className={styles.stickyHubHeader}>
+                    <div className={styles.hubNav}>
+                        <Link href="/discover" className={styles.hubNavBtn}>Comrades</Link>
+                        <Link href="/study-groups" className={`${styles.hubNavBtn} ${styles.hubNavBtnActive}`}>Study Groups</Link>
+                        <Link href="/hostels" className={styles.hubNavBtn}>Hostels</Link>
+                    </div>
                 </div>
 
                 <header className={styles.header}>

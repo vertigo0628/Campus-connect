@@ -11,6 +11,15 @@
 }
 
 /* ===== Hub Navigation ===== */
+/* ===== Sticky Hub Header ===== */
+.stickyHubHeader {
+    position: sticky;
+    top: 0;
+    z-index: 20;
+    background: var(--bg-primary);
+    padding-top: 4px;
+}
+
 .hubNav {
     display: flex;
     gap: 12px;

@@ -67,11 +67,13 @@ export default function DiscoverPage() {
 
     return (
         <div className={styles.wrapper}>
-            {/* Hub Navigation */}
-            <div className={styles.hubNav}>
-                <Link href="/discover" className={`${styles.hubNavBtn} ${styles.hubNavBtnActive}`}>Comrades</Link>
-                <Link href="/study-groups" className={styles.hubNavBtn}>Study Groups</Link>
-                <Link href="/hostels" className={styles.hubNavBtn}>Hostels</Link>
+            {/* Hub Navigation — Sticky */}
+            <div className={styles.stickyHubHeader}>
+                <div className={styles.hubNav}>
+                    <Link href="/discover" className={`${styles.hubNavBtn} ${styles.hubNavBtnActive}`}>Comrades</Link>
+                    <Link href="/study-groups" className={styles.hubNavBtn}>Study Groups</Link>
+                    <Link href="/hostels" className={styles.hubNavBtn}>Hostels</Link>
+                </div>
             </div>
 
             {/* Search Header */}

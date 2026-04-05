@@ -86,10 +86,12 @@ export default function HostelsPage() {
             <Navigation />
             <div className={styles.content}>
                 {/* Hub Navigation */}
-                <div className={styles.hubNav}>
-                    <Link href="/discover" className={styles.hubNavBtn}>Comrades</Link>
-                    <Link href="/study-groups" className={styles.hubNavBtn}>Study Groups</Link>
-                    <Link href="/hostels" className={`${styles.hubNavBtn} ${styles.hubNavBtnActive}`}>Hostels</Link>
+                <div className={styles.stickyHubHeader}>
+                    <div className={styles.hubNav}>
+                        <Link href="/discover" className={styles.hubNavBtn}>Comrades</Link>
+                        <Link href="/study-groups" className={styles.hubNavBtn}>Study Groups</Link>
+                        <Link href="/hostels" className={`${styles.hubNavBtn} ${styles.hubNavBtnActive}`}>Hostels</Link>
+                    </div>
                 </div>
 
                 <header className={styles.header}>

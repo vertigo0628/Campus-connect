@@ -117,32 +117,35 @@ export default function SemaPage() {
 
     return (
         <div className={styles.feedWrapper}>
-            {/* Category Pills Header */}
-            <div className={styles.categoryBar}>
-                {categories.map((cat) => (
-                    <button
-                        key={cat}
-                        className={`${styles.catPill} ${filter === cat ? styles.catPillActive : ""}`}
-                        onClick={() => setFilter(cat)}
-                    >
-                        {cat}
-                    </button>
-                ))}
-            </div>
-
-            {/* Instagram-style Feed Tabs */}
-            <div className={styles.feedTabs}>
-                <div
-                    className={`${styles.feedTab} ${activeTab === 'foryou' ? styles.feedTabActive : ''}`}
-                    onClick={() => setActiveTab('foryou')}
-                >
-                    For You
+            {/* Sticky Header: Category Pills + Feed Tabs */}
+            <div className={styles.stickyHeader}>
+                {/* Category Pills Header */}
+                <div className={styles.categoryBar}>
+                    {categories.map((cat) => (
+                        <button
+                            key={cat}
+                            className={`${styles.catPill} ${filter === cat ? styles.catPillActive : ""}`}
+                            onClick={() => setFilter(cat)}
+                        >
+                            {cat}
+                        </button>
+                    ))}
                 </div>
-                <div
-                    className={`${styles.feedTab} ${activeTab === 'following' ? styles.feedTabActive : ''}`}
-                    onClick={() => setActiveTab('following')}
-                >
-                    Following
+
+                {/* Instagram-style Feed Tabs */}
+                <div className={styles.feedTabs}>
+                    <div
+                        className={`${styles.feedTab} ${activeTab === 'foryou' ? styles.feedTabActive : ''}`}
+                        onClick={() => setActiveTab('foryou')}
+                    >
+                        For You
+                    </div>
+                    <div
+                        className={`${styles.feedTab} ${activeTab === 'following' ? styles.feedTabActive : ''}`}
+                        onClick={() => setActiveTab('following')}
+                    >
+                        Following
+                    </div>
                 </div>
             </div>
 

@@ -6,15 +6,20 @@
     padding: 20px 16px;
 }
 
+/* ===== Sticky Hub Header ===== */
+.stickyHubHeader {
+    position: sticky;
+    top: 0;
+    z-index: 20;
+    background: var(--bg-primary);
+    padding-top: 4px;
+}
+
 /* ===== Hub Navigation ===== */
 .hubNav {
     display: flex;
     gap: 12px;
     padding: 0 0 16px 0;
-    position: sticky;
-    top: 0;
-    z-index: 20;
-    background: var(--bg-primary);
 }
 
 .hubNavBtn {
@@ -353,7 +358,7 @@
         top: var(--nav-height);
     }
 
-    .hubNav {
+    .stickyHubHeader {
         top: var(--nav-height);
     }
 }
