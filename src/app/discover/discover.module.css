@@ -10,9 +10,14 @@
 .stickyHubHeader {
     position: sticky;
     top: 0;
-    z-index: 20;
-    background: var(--bg-primary);
-    padding-top: 4px;
+    z-index: 30;
+    background: rgba(10, 10, 10, 0.85);
+    margin: -20px -16px 16px -16px;
+    /* Counteract wrapper padding */
+    padding: 20px 16px 0 16px;
+    border-bottom: 1px solid var(--border);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
 }
 
 /* ===== Hub Navigation ===== */
@@ -44,10 +49,7 @@
 
 /* ===== Search ===== */
 .searchHeader {
-    position: sticky;
-    top: 0;
-    z-index: 10;
-    background: var(--bg-primary);
+    background: transparent;
     padding: 8px 0 12px;
 }
 
@@ -355,11 +357,7 @@
     }
 
     .searchHeader {
-        top: var(--nav-height);
-    }
-
-    .stickyHubHeader {
-        top: var(--nav-height);
+        top: 0;
     }
 }
 
