@@ -5,9 +5,7 @@
     left: 0;
     right: 0;
     height: var(--nav-height);
-    background: rgba(0, 0, 0, 0.85);
-    backdrop-filter: blur(20px) saturate(180%);
-    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    background: var(--bg-primary);
     border-bottom: 1px solid var(--border);
     z-index: 1000;
     display: none;
@@ -138,9 +136,7 @@
     left: 0;
     right: 0;
     height: var(--mobile-tab-height);
-    background: rgba(0, 0, 0, 0.92);
-    backdrop-filter: blur(20px) saturate(180%);
-    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    background: var(--bg-primary);
     border-top: 1px solid var(--border);
     display: flex;
     align-items: center;
