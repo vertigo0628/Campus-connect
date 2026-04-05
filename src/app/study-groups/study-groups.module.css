@@ -2,6 +2,9 @@
 .container {
     min-height: 100dvh;
     background: var(--bg-primary);
+    max-width: var(--content-max-width);
+    margin: 0 auto;
+    padding: 0 16px 20px;
 }
 
 .content {
@@ -14,12 +17,12 @@
 /* ===== Sticky Hub Header ===== */
 .stickyHubHeader {
     position: sticky;
-    top: var(--nav-height);
+    top: 0;
     z-index: 30;
     background: var(--bg-primary);
     /* Fully opaque */
-    margin: -20px -16px 16px -16px;
-    padding: 20px 16px 0 16px;
+    margin: 0 -16px 16px -16px;
+    padding: 16px 16px 0 16px;
     border-bottom: 1px solid var(--border);
 }
 

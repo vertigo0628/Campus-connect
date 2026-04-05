@@ -1,19 +1,20 @@
 .feedWrapper {
     min-height: 100dvh;
-    max-width: var(--feed-max-width);
+    background: var(--bg-primary);
+    max-width: var(--content-max-width);
     margin: 0 auto;
-    padding: 12px 0;
+    padding: 0 16px 20px;
 }
 
 /* ===== Sticky Header Zone ===== */
 .stickyHeader {
     position: sticky;
-    top: var(--nav-height);
+    top: 0;
     z-index: 30;
     background: var(--bg-primary);
     /* Fully opaque */
-    margin-top: -12px;
-    padding-top: 12px;
+    margin: 0 -16px 16px -16px;
+    padding: 16px 16px 12px 16px;
     border-bottom: 1px solid var(--border);
 }
 
