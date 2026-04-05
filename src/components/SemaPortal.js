@@ -16,8 +16,9 @@ export default function SemaPortal() {
     if (!mounted) return null;
 
     const isAuthPage = pathname === "/login" || pathname === "/signup";
+    const isMessages = pathname && pathname.startsWith("/messages");
 
-    if (isAuthPage) return null;
+    if (isAuthPage || isMessages) return null;
     return (
         <Link href="/sema" className={styles.semaTrigger}>
             <span className={styles.semaIcon}>🗣️</span>

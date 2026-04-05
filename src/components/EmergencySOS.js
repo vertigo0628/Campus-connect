@@ -22,7 +22,9 @@ export default function EmergencySOS() {
     if (!mounted) return null;
 
     const isAuthPage = pathname === "/login" || pathname === "/signup";
-    if (isAuthPage) return null;
+    const isMessages = pathname && pathname.startsWith("/messages");
+
+    if (isAuthPage || isMessages) return null;
 
     const emergencyContacts = [
         { name: "Campus Security (Primary)", number: "0712 345 678" },

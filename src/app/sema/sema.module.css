@@ -8,7 +8,7 @@
 /* ===== Sticky Header Zone ===== */
 .stickyHeader {
     position: sticky;
-    top: 0;
+    top: var(--nav-height);
     z-index: 30;
     background: var(--bg-primary);
     /* Fully opaque */
