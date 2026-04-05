@@ -8,6 +8,13 @@ import { useAuth } from "@/context/AuthContext";
 export default function Navigation() {
     const pathname = usePathname();
     const { user } = useAuth();
+    const [mounted, setMounted] = useState(false);
+
+    useEffect(() => {
+        setMounted(true);
+    }, []);
+
+    if (!mounted) return null;
 
     const isAuthPage = pathname === "/login" || pathname === "/signup";
     if (isAuthPage) return null;

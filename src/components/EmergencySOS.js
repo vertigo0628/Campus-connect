@@ -10,8 +10,16 @@ import styles from "./EmergencySOS.module.css";
 export default function EmergencySOS() {
     const pathname = usePathname();
     const { user } = useAuth();
+    const [mounted, setMounted] = useState(false);
+
+    useEffect(() => {
+        setMounted(true);
+    }, []);
+
     const [isOpen, setIsOpen] = useState(false);
     const [isBroadcasting, setIsBroadcasting] = useState(false);
+
+    if (!mounted) return null;
 
     const isAuthPage = pathname === "/login" || pathname === "/signup";
     if (isAuthPage) return null;
