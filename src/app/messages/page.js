@@ -3,9 +3,10 @@
 import { useState, useEffect, useRef, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import { db } from "@/lib/firebase";
-import { collection, query, where, orderBy, onSnapshot, addDoc, serverTimestamp, doc, getDoc, setDoc, updateDoc, getDocs, limit, deleteDoc } from "firebase/firestore";
+import { doc, getDoc, setDoc, updateDoc, getDocs, limit, deleteDoc } from "firebase/firestore";
 import { useAuth } from "@/context/AuthContext";
 import SmartConfirmModal from "@/components/SmartConfirmModal";
+import Link from "next/link";
 import styles from "./messages.module.css";
 
 export default function MessagesPage() {
@@ -202,6 +203,11 @@ function MessagesContent() {
         }
     };
 
+    const getOtherId = (convo) => {
+        if (!user || !convo?.participants) return null;
+        return convo.participants.find(id => id !== user.uid);
+    };
+
     const getOtherName = (convo) => {
         if (!convo?.participantNames || !user) return "Comrade";
         const otherId = convo.participants.find(p => p !== user.uid);
@@ -283,13 +289,18 @@ function MessagesContent() {
                             {/* Chat Header */}
                             <div className={styles.chatHeader}>
                                 <button className={styles.backBtn} onClick={() => setActiveConvo(null)}>←</button>
-                                <div className={styles.chatHeaderAvatar}>
-                                    {getOtherName(activeConvo).charAt(0).toUpperCase()}
-                                </div>
-                                <div className={styles.chatHeaderInfo}>
-                                    <span className={styles.chatHeaderName}>{getOtherName(activeConvo)}</span>
-                                    <span className={styles.chatHeaderSub}>Tap to view profile</span>
-                                </div>
+                                <Link
+                                    href={`/user/${getOtherId(activeConvo)}`}
+                                    style={{ display: 'flex', alignItems: 'center', textDecoration: 'none', color: 'inherit', flex: 1, gap: '10px' }}
+                                >
+                                    <div className={styles.chatHeaderAvatar}>
+                                        {getOtherName(activeConvo).charAt(0).toUpperCase()}
+                                    </div>
+                                    <div className={styles.chatHeaderInfo}>
+                                        <span className={styles.chatHeaderName}>{getOtherName(activeConvo)}</span>
+                                        <span className={styles.chatHeaderSub}>Tap to view profile</span>
+                                    </div>
+                                </Link>
                                 <button className={styles.shareContactBtn} onClick={handleShareContact} title="Share your contact">
                                     📇
                                 </button>

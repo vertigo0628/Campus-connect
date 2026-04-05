@@ -6,8 +6,9 @@ export default function manifest() {
             "One platform for everything in campus — trade textbooks, find hostels, join study groups, access M-Pesa payments, and stay safe with emergency SOS.",
         start_url: "/",
         display: "standalone",
-        background_color: "#0a0e17",
-        theme_color: "#006633",
+        display_override: ["standalone", "window-controls-overlay"],
+        background_color: "#000000",
+        theme_color: "#00bf63",
         orientation: "portrait-primary",
         categories: ["education", "social", "lifestyle"],
         icons: [

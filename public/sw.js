@@ -1,9 +1,10 @@
 const CACHE_NAME = "campus-connect-v1";
 const STATIC_ASSETS = [
     "/",
+    "/brand/logo.png",
+    "/brand/maskable.png",
     "/icons/icon-192.svg",
     "/icons/icon-512.svg",
-    "/icons/icon-maskable.svg",
 ];
 
 // Install — pre-cache the shell

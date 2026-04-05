@@ -1,7 +1,6 @@
 .sosTrigger {
     position: fixed;
-    bottom: 90px;
-    /* Above mobile nav */
+    bottom: calc(var(--mobile-tab-height) + env(safe-area-inset-bottom, 16px) + 85px);
     right: 20px;
     background: #ff4d4f;
     color: white;
@@ -199,5 +198,7 @@
 @media (min-width: 768px) {
     .sosTrigger {
         bottom: 30px;
+        right: auto;
+        left: 30px;
     }
 }

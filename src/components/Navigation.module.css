@@ -185,7 +185,13 @@
 
 @media (max-width: 768px) {
     .nav {
-        display: none;
+        display: block;
+    }
+
+    .desktopLinks,
+    .desktopRight,
+    .authLinks {
+        display: none !important;
     }
 
     .mobileBar {

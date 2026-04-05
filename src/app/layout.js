@@ -6,7 +6,7 @@ const geistSans = { variable: "--font-geist-sans" };
 const geistMono = { variable: "--font-geist-mono" };
 
 export const viewport = {
-  themeColor: "#006633",
+  themeColor: "#00bf63",
   width: "device-width",
   initialScale: 1,
 };

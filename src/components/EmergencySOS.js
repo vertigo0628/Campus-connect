@@ -1,15 +1,20 @@
 "use client";
 
 import { useState } from "react";
+import { usePathname } from "next/navigation";
 import { db } from "@/lib/firebase";
 import { collection, addDoc, serverTimestamp } from "firebase/firestore";
 import { useAuth } from "@/context/AuthContext";
 import styles from "./EmergencySOS.module.css";
 
 export default function EmergencySOS() {
+    const pathname = usePathname();
     const { user } = useAuth();
     const [isOpen, setIsOpen] = useState(false);
     const [isBroadcasting, setIsBroadcasting] = useState(false);
+
+    const isAuthPage = pathname === "/login" || pathname === "/signup";
+    if (isAuthPage) return null;
 
     const emergencyContacts = [
         { name: "Campus Security (Primary)", number: "0712 345 678" },
