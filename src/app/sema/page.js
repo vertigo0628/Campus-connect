@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { db } from "@/lib/firebase";
-import { collection, query, orderBy, limit, onSnapshot, addDoc, serverTimestamp, doc } from "firebase/firestore";
+import { collection, query, orderBy, limit, onSnapshot, addDoc, serverTimestamp, doc, getDocs } from "firebase/firestore";
 import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/context/AuthContext";
 import SemaPost from "@/components/SemaPost";
@@ -22,6 +22,7 @@ export default function SemaPage() {
     const [isComposeExpanded, setIsComposeExpanded] = useState(false);
     const [commentPost, setCommentPost] = useState(null);
     const [profile, setProfile] = useState(null);
+    const [followingIds, setFollowingIds] = useState([]);
 
     const categories = ["All", "Security", "Wellness", "Academics", "Market", "Gossip"];
 
@@ -36,6 +37,19 @@ export default function SemaPage() {
             if (snap.exists()) {
                 setProfile(snap.data());
             }
+        });
+        return () => unsub();
+    }, [user]);
+
+    // Listen for the user's following list
+    useEffect(() => {
+        if (!user) {
+            setFollowingIds([]);
+            return;
+        }
+        const followingRef = collection(db, "profiles", user.uid, "following");
+        const unsub = onSnapshot(followingRef, (snap) => {
+            setFollowingIds(snap.docs.map(d => d.id));
         });
         return () => unsub();
     }, [user]);
@@ -59,7 +73,12 @@ export default function SemaPage() {
                 if (filter !== "All") {
                     filtered = filtered.filter(p => p.category === filter);
                 }
-                // (Following filter logic would go here, currently showing all for "foryou")
+                // Following tab: only show posts from people the user follows
+                if (activeTab === 'following' && followingIds.length > 0) {
+                    filtered = filtered.filter(p => followingIds.includes(p.creatorId));
+                } else if (activeTab === 'following' && followingIds.length === 0) {
+                    filtered = []; // No one followed yet
+                }
                 setPosts(filtered);
                 setLoading(false);
             },
@@ -70,7 +89,7 @@ export default function SemaPage() {
         );
 
         return () => unsubscribe();
-    }, [filter]);
+    }, [filter, activeTab, followingIds]);
 
     const handleFileSelect = (e) => {
         const file = e.target.files[0];
