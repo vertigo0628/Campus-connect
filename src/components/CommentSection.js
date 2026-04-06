@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import { db } from "@/lib/firebase";
+import { supabase } from "@/lib/supabase";
 import { collection, query, orderBy, onSnapshot, addDoc, serverTimestamp, doc, updateDoc, increment, deleteDoc } from "firebase/firestore";
 import { useAuth } from "@/context/AuthContext";
 import SmartConfirmModal from "@/components/SmartConfirmModal";
@@ -11,9 +12,19 @@ export default function CommentSection({ isOpen, onClose, post }) {
     const { user } = useAuth();
     const [comments, setComments] = useState([]);
     const [newComment, setNewComment] = useState("");
+    const [selectedFile, setSelectedFile] = useState(null);
+    const [filePreview, setFilePreview] = useState(null);
     const [submitting, setSubmitting] = useState(false);
     const [confirmState, setConfirmState] = useState({ isOpen: false, title: "", message: "", action: null, loading: false });
     const bottomRef = useRef(null);
+
+    const handleFileSelect = (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            setSelectedFile(file);
+            setFilePreview(URL.createObjectURL(file));
+        }
+    };
 
     useEffect(() => {
         if (!isOpen || !post?.id) return;
@@ -31,12 +42,36 @@ export default function CommentSection({ isOpen, onClose, post }) {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        if (!newComment.trim() || !user || !post?.id) return;
+        if ((!newComment.trim() && !selectedFile) || !user || !post?.id) return;
 
         setSubmitting(true);
         try {
+            let mediaUrl = null;
+            let mediaType = null;
+
+            if (selectedFile) {
+                const fileName = `${Date.now()}-${selectedFile.name}`;
+                const { error: uploadError } = await supabase.storage
+                    .from('showcase')
+                    .upload(`comments/${fileName}`, selectedFile, {
+                        contentType: selectedFile.type || 'image/jpeg',
+                        upsert: true
+                    });
+
+                if (uploadError) throw uploadError;
+
+                const { data: { publicUrl } } = supabase.storage
+                    .from('showcase')
+                    .getPublicUrl(`comments/${fileName}`);
+
+                mediaUrl = publicUrl;
+                mediaType = selectedFile.type.startsWith('video/') ? 'video' : 'image';
+            }
+
             await addDoc(collection(db, "sema_posts", post.id, "comments"), {
                 text: newComment.trim(),
+                mediaUrl,
+                mediaType,
                 authorId: user.uid,
                 authorName: user.displayName || user.email?.split("@")[0] || "Comrade",
                 authorPhoto: user.photoURL || null,
@@ -49,6 +84,8 @@ export default function CommentSection({ isOpen, onClose, post }) {
             });
 
             setNewComment("");
+            setSelectedFile(null);
+            setFilePreview(null);
         } catch (error) {
             console.error("Error posting comment:", error);
         } finally {
@@ -124,6 +161,15 @@ export default function CommentSection({ isOpen, onClose, post }) {
                                         )}
                                     </div>
                                     <p className={styles.commentText}>{c.text}</p>
+                                    {c.mediaUrl && (
+                                        <div style={{ marginTop: '8px' }}>
+                                            {c.mediaType === 'video' ? (
+                                                <video src={c.mediaUrl} controls className={styles.commentMedia} />
+                                            ) : (
+                                                <img src={c.mediaUrl} alt="Comment media" className={styles.commentMedia} />
+                                            )}
+                                        </div>
+                                    )}
                                 </div>
                             </div>
                         ))
@@ -132,22 +178,42 @@ export default function CommentSection({ isOpen, onClose, post }) {
                 </div>
 
                 {user ? (
-                    <form className={styles.inputArea} onSubmit={handleSubmit}>
-                        <div className={styles.inputAvatar}>
-                            {user.displayName?.charAt(0)?.toUpperCase() || "Y"}
-                        </div>
-                        <input
-                            type="text"
-                            placeholder="Add a comment..."
-                            value={newComment}
-                            onChange={e => setNewComment(e.target.value)}
-                            className={styles.commentInput}
-                            maxLength={300}
-                        />
-                        <button type="submit" disabled={submitting || !newComment.trim()} className={styles.postBtn}>
-                            {submitting ? "..." : "Post"}
-                        </button>
-                    </form>
+                    <div className={styles.inputWrapper}>
+                        {filePreview && (
+                            <div className={styles.previewContainer}>
+                                {selectedFile?.type.startsWith('video/') ? (
+                                    <video src={filePreview} className={styles.previewMedia} />
+                                ) : (
+                                    <img src={filePreview} alt="Preview" className={styles.previewMedia} />
+                                )}
+                                <button
+                                    type="button"
+                                    onClick={() => { setSelectedFile(null); setFilePreview(null); }}
+                                    className={styles.removeMediaBtn}
+                                >✕</button>
+                            </div>
+                        )}
+                        <form className={styles.inputArea} onSubmit={handleSubmit}>
+                            <div className={styles.inputAvatar}>
+                                {user.displayName?.charAt(0)?.toUpperCase() || "Y"}
+                            </div>
+                            <label className={styles.uploadLabel}>
+                                📸
+                                <input type="file" accept="image/*,video/*" hidden onChange={handleFileSelect} />
+                            </label>
+                            <input
+                                type="text"
+                                placeholder="Add a comment..."
+                                value={newComment}
+                                onChange={e => setNewComment(e.target.value)}
+                                className={styles.commentInput}
+                                maxLength={300}
+                            />
+                            <button type="submit" disabled={submitting || (!newComment.trim() && !selectedFile)} className={styles.postBtn}>
+                                {submitting ? "..." : "Post"}
+                            </button>
+                        </form>
+                    </div>
                 ) : (
                     <div className={styles.loginPrompt}>Log in to comment</div>
                 )}
