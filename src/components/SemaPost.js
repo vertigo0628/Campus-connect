@@ -18,6 +18,16 @@ export default function SemaPost({ post, onCommentOpen }) {
     const [commentPreview, setCommentPreview] = useState([]);
     const [showFullCaption, setShowFullCaption] = useState(false);
     const [confirmState, setConfirmState] = useState({ isOpen: false, title: "", message: "", action: null, loading: false });
+    const [currentUserProfile, setCurrentUserProfile] = useState(null);
+
+    // Listen for current user's profile (for notifications)
+    useEffect(() => {
+        if (!user) return;
+        const unsub = onSnapshot(doc(db, "profiles", user.uid), (snap) => {
+            if (snap.exists()) setCurrentUserProfile(snap.data());
+        });
+        return () => unsub();
+    }, [user]);
 
     // Real-time listener for post-level stats (likes + comments)
     useEffect(() => {
@@ -71,6 +81,21 @@ export default function SemaPost({ post, onCommentOpen }) {
                 await updateDoc(postRef, { likeCount: increment(1) });
                 setLikeCount(prev => prev + 1);
                 setLiked(true);
+
+                // Notify post author (if not self)
+                if (post.creatorId && post.creatorId !== user.uid) {
+                    await addDoc(collection(db, "notifications"), {
+                        recipientId: post.creatorId,
+                        senderId: user.uid,
+                        senderName: currentUserProfile?.displayName || user.displayName || "A comrade",
+                        senderPhoto: currentUserProfile?.photoURL || user.photoURL || null,
+                        type: "like",
+                        postId: post.id,
+                        text: "liked your post",
+                        isRead: false,
+                        createdAt: serverTimestamp()
+                    });
+                }
             }
         } catch (error) {
             console.error("Error toggling like:", error);

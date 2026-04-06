@@ -99,6 +99,21 @@ export default function CommentSection({ isOpen, onClose, post }) {
                 commentCount: increment(1)
             });
 
+            // Notify post author (if not self)
+            if (post.creatorId && post.creatorId !== user.uid) {
+                await addDoc(collection(db, "notifications"), {
+                    recipientId: post.creatorId,
+                    senderId: user.uid,
+                    senderName: profile?.displayName || user.displayName || "A comrade",
+                    senderPhoto: profile?.photoURL || user.photoURL || null,
+                    type: "comment",
+                    postId: post.id,
+                    text: `commented: "${newComment.trim().substring(0, 30)}${newComment.length > 30 ? '...' : ''}"`,
+                    isRead: false,
+                    createdAt: serverTimestamp()
+                });
+            }
+
             setNewComment("");
             setSelectedFile(null);
             setFilePreview(null);

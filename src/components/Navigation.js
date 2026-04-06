@@ -1,6 +1,8 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { db } from "@/lib/firebase";
+import { collection, query, where, onSnapshot } from "firebase/firestore";
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -11,10 +13,28 @@ export default function Navigation() {
     const pathname = usePathname();
     const { user } = useAuth();
     const [mounted, setMounted] = useState(false);
+    const [unreadCount, setUnreadCount] = useState(0);
 
     useEffect(() => {
         setMounted(true);
     }, []);
+
+    // Listen for unread notifications
+    useEffect(() => {
+        if (!user) {
+            setUnreadCount(0);
+            return;
+        }
+        const q = query(
+            collection(db, "notifications"),
+            where("recipientId", "==", user.uid),
+            where("isRead", "==", false)
+        );
+        const unsub = onSnapshot(q, (snap) => {
+            setUnreadCount(snap.size);
+        });
+        return () => unsub();
+    }, [user]);
 
     if (!mounted) return null;
 
@@ -61,6 +81,11 @@ export default function Navigation() {
             iconFilled: <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z" /></svg>
         },
         {
+            label: "Activity", path: "/notifications",
+            icon: <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z" /></svg>,
+            iconFilled: <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" /></svg>
+        },
+        {
             label: "Profile", path: "/profile",
             icon: <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2" /><circle cx="12" cy="7" r="4" /></svg>,
             iconFilled: <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2" /><circle cx="12" cy="7" r="4" /></svg>
@@ -89,14 +114,18 @@ export default function Navigation() {
                                 href={item.path}
                                 className={`${styles.desktopLink} ${isActive(item.path) ? styles.desktopActive : ""}`}
                                 title={item.label}
+                                style={{ position: 'relative' }}
                             >
                                 {isActive(item.path) ? item.iconFilled : item.icon}
+                                {item.label === "Activity" && unreadCount > 0 && (
+                                    <span className={styles.badge} style={{ top: 2, right: 2 }}>{unreadCount}</span>
+                                )}
                             </Link>
                         ))}
                     </div>
 
                     <div className={styles.desktopRight}>
-                        <Link href="/profile" className={styles.avatarLink}>
+                        <Link href="/profile" className={styles.avatarLink} style={{ position: 'relative' }}>
                             <img
                                 src={user.photoURL || `https://ui-avatars.com/api/?name=${user.displayName || "U"}&background=1c1c1e&color=f5f5f7`}
                                 alt="You"
@@ -117,6 +146,9 @@ export default function Navigation() {
                     >
                         <span className={styles.tabIconWrap}>
                             {isActive(item.path) ? item.iconFilled : item.icon}
+                            {item.label === "Activity" && unreadCount > 0 && (
+                                <span className={styles.badge}>{unreadCount}</span>
+                            )}
                         </span>
                     </Link>
                 ))}

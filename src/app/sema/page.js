@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
+import { useSearchParams } from "next/navigation";
 import { db } from "@/lib/firebase";
 import { collection, query, orderBy, limit, onSnapshot, addDoc, serverTimestamp, doc, getDocs } from "firebase/firestore";
 import { supabase } from "@/lib/supabase";
@@ -10,7 +11,17 @@ import CommentSection from "@/components/CommentSection";
 import styles from "./sema.module.css";
 
 export default function SemaPage() {
+    return (
+        <Suspense fallback={<div className={styles.feedWrapper}><div className={styles.loading}><p>Loading Feed...</p></div></div>}>
+            <SemaContent />
+        </Suspense>
+    );
+}
+
+function SemaContent() {
     const { user } = useAuth();
+    const searchParams = useSearchParams();
+    const highlightPostId = searchParams.get("post");
     const [posts, setPosts] = useState([]);
     const [loading, setLoading] = useState(true);
     const [activeTab, setActiveTab] = useState("foryou"); // "foryou" | "following"
@@ -90,6 +101,21 @@ export default function SemaPage() {
 
         return () => unsubscribe();
     }, [filter, activeTab, followingIds]);
+
+    // Deep link effect
+    useEffect(() => {
+        if (highlightPostId && !loading && posts.length > 0) {
+            const el = document.getElementById(`post-${highlightPostId}`);
+            if (el) {
+                setTimeout(() => {
+                    el.scrollIntoView({ behavior: "smooth", block: "center" });
+                    el.style.transition = "box-shadow 0.5s ease";
+                    el.style.boxShadow = "0 0 0 2px var(--primary)";
+                    setTimeout(() => el.style.boxShadow = "", 3000);
+                }, 500);
+            }
+        }
+    }, [highlightPostId, loading, posts]);
 
     const handleFileSelect = (e) => {
         const file = e.target.files[0];
@@ -286,11 +312,12 @@ export default function SemaPage() {
                     <div className={styles.loading}>Loading feed...</div>
                 ) : posts.length > 0 ? (
                     posts.map(post => (
-                        <SemaPost
-                            key={post.id}
-                            post={post}
-                            onCommentOpen={() => setCommentPost(post)}
-                        />
+                        <div key={post.id} id={`post-${post.id}`}>
+                            <SemaPost
+                                post={post}
+                                onCommentOpen={() => setCommentPost(post)}
+                            />
+                        </div>
                     ))
                 ) : (
                     <div className={styles.empty}>
