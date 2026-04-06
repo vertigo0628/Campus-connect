@@ -2,14 +2,16 @@
 
 import { useState, useEffect } from "react";
 import { db } from "@/lib/firebase";
-import { doc, updateDoc, increment, setDoc, deleteDoc, getDoc, collection, query, orderBy, limit, onSnapshot, serverTimestamp } from "firebase/firestore";
+import { doc, updateDoc, increment, setDoc, deleteDoc, getDoc, collection, query, orderBy, limit, onSnapshot, serverTimestamp, addDoc } from "firebase/firestore";
 import { useAuth } from "@/context/AuthContext";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 import SmartConfirmModal from "@/components/SmartConfirmModal";
 import styles from "./SemaPost.module.css";
 
 export default function SemaPost({ post, onCommentOpen }) {
     const { user } = useAuth();
+    const router = useRouter();
     const [liked, setLiked] = useState(false);
     const [likeCount, setLikeCount] = useState(post.likeCount || 0);
     const [commentPreview, setCommentPreview] = useState([]);
@@ -78,6 +80,58 @@ export default function SemaPost({ post, onCommentOpen }) {
         });
     };
 
+    const handleMessageAuthor = async () => {
+        if (!user) {
+            alert("Please log in to message the author.");
+            return;
+        }
+        if (post.creatorId === 'anonymous' || !post.creatorId) {
+            alert("Cannot message an anonymous user.");
+            return;
+        }
+        if (post.creatorId === user.uid) {
+            alert("You cannot message yourself.");
+            return;
+        }
+
+        try {
+            const convoId = [user.uid, post.creatorId].sort().join("_");
+            const convoRef = doc(db, "conversations", convoId);
+            const convoSnap = await getDoc(convoRef);
+
+            if (!convoSnap.exists()) {
+                await setDoc(convoRef, {
+                    participants: [user.uid, post.creatorId],
+                    updatedAt: serverTimestamp(),
+                    lastMessage: "Started exploring a post setup",
+                    participantsData: {
+                        [user.uid]: { displayName: user.displayName || user.email?.split("@")[0] || "User", photoURL: user.photoURL || null },
+                        [post.creatorId]: { displayName: post.creatorName || "Comrade", photoURL: null } // The target comrade
+                    }
+                });
+            }
+
+            const postRefText = post.content ? `Hey! I saw your post: "${post.content.substring(0, 40)}..."` : `Hey! I saw your image post on the Feed.`;
+
+            await addDoc(collection(db, "conversations", convoId, "messages"), {
+                text: postRefText,
+                senderId: user.uid,
+                createdAt: serverTimestamp(),
+                type: "text"
+            });
+
+            await updateDoc(convoRef, {
+                updatedAt: serverTimestamp(),
+                lastMessage: postRefText
+            });
+
+            router.push(`/messages`);
+        } catch (error) {
+            console.error("Error initiating DM:", error);
+            alert("Could not start conversation.");
+        }
+    };
+
     const timeAgo = (timestamp) => {
         if (!timestamp) return "Just now";
         const now = new Date();
@@ -140,7 +194,7 @@ export default function SemaPost({ post, onCommentOpen }) {
                 <button className={styles.actionBtn} onClick={onCommentOpen}>
                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 11.5a8.38 8.38 0 01-.9 3.8 8.5 8.5 0 01-7.6 4.7 8.38 8.38 0 01-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 01-.9-3.8 8.5 8.5 0 014.7-7.6 8.38 8.38 0 013.8-.9h.5a8.48 8.48 0 018 8v.5z" /></svg>
                 </button>
-                <button className={styles.actionBtn}>
+                <button className={styles.actionBtn} onClick={handleMessageAuthor} title="Message Author">
                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="22" y1="2" x2="11" y2="13" /><polygon points="22 2 15 22 11 13 2 9 22 2" /></svg>
                 </button>
             </div>
