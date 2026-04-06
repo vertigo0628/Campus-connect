@@ -281,6 +281,7 @@ export default function SemaPage() {
             {/* Comments Drawer Placeholder */}
             {commentPost && (
                 <CommentSection
+                    isOpen={!!commentPost}
                     post={commentPost}
                     onClose={() => setCommentPost(null)}
                 />
