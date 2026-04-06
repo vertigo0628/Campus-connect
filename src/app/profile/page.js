@@ -360,6 +360,13 @@ export default function Profile() {
                         >
                             View Public Profile
                         </button>
+                        <button
+                            className={styles.editBtn}
+                            style={{ background: 'rgba(255, 69, 58, 0.1)', color: '#ff453a', border: '1px solid rgba(255, 69, 58, 0.3)' }}
+                            onClick={() => setIsLogoutModalOpen(true)}
+                        >
+                            Log Out
+                        </button>
                     </div>
 
                     <div className={styles.statsRow}>
