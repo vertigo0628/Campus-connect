@@ -51,7 +51,10 @@ export default function HostelsPage() {
             const fileName = `${Date.now()}-${formData.image.name}`;
             const { data: uploadData, error: uploadError } = await supabase.storage
                 .from("hostels")
-                .upload(fileName, formData.image);
+                .upload(fileName, formData.image, {
+                    contentType: formData.image.type || 'image/jpeg',
+                    upsert: true
+                });
 
             if (uploadError) throw uploadError;
 

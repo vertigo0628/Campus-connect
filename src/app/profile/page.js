@@ -255,7 +255,11 @@ export default function Profile() {
             // Upload to Supabase Storage
             const { data, error } = await supabase.storage
                 .from(bucket)
-                .upload(fileName, file, { cacheControl: '3600', upsert: true });
+                .upload(fileName, file, {
+                    cacheControl: '3600',
+                    upsert: true,
+                    contentType: file.type || 'image/jpeg'
+                });
 
             if (error) throw error;
 

@@ -78,7 +78,10 @@ export default function SemaPage() {
                 const fileName = `${Date.now()}-${selectedFile.name}`;
                 const { data, error } = await supabase.storage
                     .from('showcase')
-                    .upload(`sema/${fileName}`, selectedFile);
+                    .upload(`sema/${fileName}`, selectedFile, {
+                        contentType: selectedFile.type || 'image/jpeg',
+                        upsert: true
+                    });
 
                 if (error) throw error;
 
