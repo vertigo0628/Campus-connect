@@ -14,9 +14,24 @@ export default function SemaPost({ post, onCommentOpen }) {
     const router = useRouter();
     const [liked, setLiked] = useState(false);
     const [likeCount, setLikeCount] = useState(post.likeCount || 0);
+    const [commentCount, setCommentCount] = useState(post.commentCount || 0);
     const [commentPreview, setCommentPreview] = useState([]);
     const [showFullCaption, setShowFullCaption] = useState(false);
     const [confirmState, setConfirmState] = useState({ isOpen: false, title: "", message: "", action: null, loading: false });
+
+    // Real-time listener for post-level stats (likes + comments)
+    useEffect(() => {
+        if (!post.id) return;
+        const postRef = doc(db, "sema_posts", post.id);
+        const unsub = onSnapshot(postRef, (snap) => {
+            if (snap.exists()) {
+                const data = snap.data();
+                setLikeCount(data.likeCount || 0);
+                setCommentCount(data.commentCount || 0);
+            }
+        });
+        return () => unsub();
+    }, [post.id]);
 
     // Check if user already liked
     useEffect(() => {
@@ -191,8 +206,11 @@ export default function SemaPost({ post, onCommentOpen }) {
                         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z" /></svg>
                     )}
                 </button>
-                <button className={styles.actionBtn} onClick={onCommentOpen}>
+                <button className={styles.actionBtn} onClick={onCommentOpen} style={{ position: 'relative' }}>
                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 11.5a8.38 8.38 0 01-.9 3.8 8.5 8.5 0 01-7.6 4.7 8.38 8.38 0 01-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 01-.9-3.8 8.5 8.5 0 014.7-7.6 8.38 8.38 0 013.8-.9h.5a8.48 8.48 0 018 8v.5z" /></svg>
+                    {commentCount > 0 && (
+                        <span className={styles.commentBadge}>{commentCount > 99 ? '99+' : commentCount}</span>
+                    )}
                 </button>
                 <button className={styles.actionBtn} onClick={handleMessageAuthor} title="Message Author">
                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="22" y1="2" x2="11" y2="13" /><polygon points="22 2 15 22 11 13 2 9 22 2" /></svg>
