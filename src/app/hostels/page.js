@@ -50,8 +50,8 @@ export default function HostelsPage() {
             // Upload Image to Supabase
             const fileName = `${Date.now()}-${formData.image.name}`;
             const { data: uploadData, error: uploadError } = await supabase.storage
-                .from("hostels")
-                .upload(fileName, formData.image, {
+                .from("showcase")
+                .upload(`hostels/${fileName}`, formData.image, {
                     contentType: formData.image.type || 'image/jpeg',
                     upsert: true
                 });
@@ -59,8 +59,8 @@ export default function HostelsPage() {
             if (uploadError) throw uploadError;
 
             const { data: { publicUrl } } = supabase.storage
-                .from("hostels")
-                .getPublicUrl(fileName);
+                .from("showcase")
+                .getPublicUrl(`hostels/${fileName}`);
 
             // Save to Firestore
             await addDoc(collection(db, "hostels"), {
