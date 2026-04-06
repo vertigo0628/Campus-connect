@@ -128,7 +128,12 @@ export default function HostelsPage() {
                                     </div>
                                     <button
                                         className={styles.viewBtn}
-                                        onClick={() => window.open(`https://wa.me/${hostel.contact?.replace(/\D/g, '')}`, '_blank')}
+                                        onClick={() => {
+                                            let num = hostel.contact?.replace(/\D/g, '') || "";
+                                            if (num.startsWith('0')) num = '254' + num.slice(1);
+                                            else if (num.length === 9) num = '254' + num;
+                                            window.open(`https://wa.me/${num}`, '_blank');
+                                        }}
                                     >
                                         WhatsApp Lead 💬
                                     </button>
@@ -179,7 +184,7 @@ export default function HostelsPage() {
                             />
                             <input
                                 type="text"
-                                placeholder="WhatsApp Number (e.g. 254...)"
+                                placeholder="WhatsApp (e.g. 0712345678)"
                                 value={formData.contact}
                                 onChange={(e) => setFormData({ ...formData, contact: e.target.value })}
                                 required
