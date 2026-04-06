@@ -30,9 +30,19 @@ function MessagesContent() {
     const [sending, setSending] = useState(false);
     const [loading, setLoading] = useState(true);
     const [confirmState, setConfirmState] = useState({ isOpen: false, title: "", message: "", action: null, loading: false });
+    const [profile, setProfile] = useState(null);
     const bottomRef = useRef(null);
 
     const isInitializing = useRef(false);
+
+    // Listen for current user's profile
+    useEffect(() => {
+        if (!user) return;
+        const unsub = onSnapshot(doc(db, "profiles", user.uid), (snap) => {
+            if (snap.exists()) setProfile(snap.data());
+        });
+        return () => unsub();
+    }, [user]);
 
     // Load all conversations for current user
     useEffect(() => {
@@ -124,7 +134,7 @@ function MessagesContent() {
 
         setSending(true);
         try {
-            const senderName = user.displayName || user.email?.split("@")[0] || "Comrade";
+            const senderName = profile?.displayName || user.displayName || user.email?.split("@")[0] || "Comrade";
 
             await addDoc(collection(db, "conversations", activeConvo.id, "messages"), {
                 text: newMsg.trim(),
@@ -183,7 +193,7 @@ function MessagesContent() {
     const handleShareContact = async () => {
         if (!activeConvo?.id || !user) return;
         const contact = user.email || "No email";
-        const senderName = user.displayName || user.email?.split("@")[0] || "Comrade";
+        const senderName = profile?.displayName || user.displayName || user.email?.split("@")[0] || "Comrade";
 
         try {
             await addDoc(collection(db, "conversations", activeConvo.id, "messages"), {

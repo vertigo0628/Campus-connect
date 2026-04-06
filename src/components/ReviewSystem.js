@@ -13,6 +13,15 @@ export default function ReviewSystem({ targetUserId, targetUserName }) {
     const [text, setText] = useState("");
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [loading, setLoading] = useState(true);
+    const [profile, setProfile] = useState(null);
+
+    useEffect(() => {
+        if (!user) return;
+        const unsub = onSnapshot(doc(db, "profiles", user.uid), (snap) => {
+            if (snap.exists()) setProfile(snap.data());
+        });
+        return () => unsub();
+    }, [user]);
 
     useEffect(() => {
         if (!targetUserId) return;
@@ -45,8 +54,8 @@ export default function ReviewSystem({ targetUserId, targetUserName }) {
             await addDoc(collection(db, "reviews"), {
                 targetId: targetUserId,
                 authorId: user.uid,
-                authorName: user.displayName || "Anonymous Student",
-                authorPhoto: user.photoURL || null,
+                authorName: profile?.displayName || user.displayName || "Anonymous Student",
+                authorPhoto: profile?.photoURL || user.photoURL || null,
                 rating: Number(rating),
                 text,
                 timestamp: serverTimestamp()
