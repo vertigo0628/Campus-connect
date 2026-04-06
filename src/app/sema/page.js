@@ -2,6 +2,7 @@
 
 import { useState, useEffect, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
+import Link from "next/link";
 import { db } from "@/lib/firebase";
 import { collection, query, orderBy, limit, onSnapshot, addDoc, serverTimestamp, doc, getDocs } from "firebase/firestore";
 import { supabase } from "@/lib/supabase";

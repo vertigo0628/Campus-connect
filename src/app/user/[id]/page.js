@@ -122,20 +122,6 @@ export default function PublicProfile({ params }) {
                 await setDoc(followingRef, { timestamp: serverTimestamp() });
                 await updateDoc(targetProfileRef, { followers: increment(1) });
                 await updateDoc(myProfileRef, { following: increment(1) });
-
-                // Notify target user
-                const myData = myProfileSnap.exists() ? myProfileSnap.data() : null;
-                await addDoc(collection(db, "notifications"), {
-                    recipientId: targetUserId,
-                    senderId: currentUser.uid,
-                    senderName: myData?.displayName || currentUser.displayName || "A new comrade",
-                    senderPhoto: myData?.photoURL || currentUser.photoURL || null,
-                    type: "follow",
-                    text: "started following you",
-                    isRead: false,
-                    createdAt: serverTimestamp()
-                });
-
                 setIsFollowing(true);
                 setProfile(prev => ({ ...prev, followers: (prev.followers || 0) + 1 }));
             }

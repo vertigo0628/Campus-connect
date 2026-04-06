@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { db } from "@/lib/firebase";
-import { collection, query, where, onSnapshot } from "firebase/firestore";
+import { doc, onSnapshot } from "firebase/firestore";
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -13,28 +13,10 @@ export default function Navigation() {
     const pathname = usePathname();
     const { user } = useAuth();
     const [mounted, setMounted] = useState(false);
-    const [unreadCount, setUnreadCount] = useState(0);
 
     useEffect(() => {
         setMounted(true);
     }, []);
-
-    // Listen for unread notifications
-    useEffect(() => {
-        if (!user) {
-            setUnreadCount(0);
-            return;
-        }
-        const q = query(
-            collection(db, "notifications"),
-            where("recipientId", "==", user.uid),
-            where("isRead", "==", false)
-        );
-        const unsub = onSnapshot(q, (snap) => {
-            setUnreadCount(snap.size);
-        });
-        return () => unsub();
-    }, [user]);
 
     if (!mounted) return null;
 
@@ -116,13 +98,12 @@ export default function Navigation() {
                     </div>
 
                     <div className={styles.desktopRight}>
-                        <Link href="/profile" className={styles.avatarLink} style={{ position: 'relative' }}>
+                        <Link href="/profile" className={styles.avatarLink}>
                             <img
                                 src={user.photoURL || `https://ui-avatars.com/api/?name=${user.displayName || "U"}&background=1c1c1e&color=f5f5f7`}
                                 alt="You"
                                 className={`${styles.navAvatar} ${isActive("/profile") ? styles.navAvatarActive : ""}`}
                             />
-                            {unreadCount > 0 && <span className={styles.badge} style={{ top: -4, right: -4 }}>{unreadCount}</span>}
                         </Link>
                     </div>
                 </div>
@@ -138,9 +119,6 @@ export default function Navigation() {
                     >
                         <span className={styles.tabIconWrap}>
                             {isActive(item.path) ? item.iconFilled : item.icon}
-                            {item.label === "Profile" && unreadCount > 0 && (
-                                <span className={styles.badge}>{unreadCount}</span>
-                            )}
                         </span>
                     </Link>
                 ))}

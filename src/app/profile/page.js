@@ -362,13 +362,6 @@ export default function Profile() {
                         </button>
                         <button
                             className={styles.editBtn}
-                            style={{ background: 'var(--surface)', color: 'var(--text-primary)', border: '1px solid var(--border)' }}
-                            onClick={() => router.push('/notifications')}
-                        >
-                            Activity History
-                        </button>
-                        <button
-                            className={styles.editBtn}
                             style={{ background: 'rgba(255, 69, 58, 0.1)', color: '#ff453a', border: '1px solid rgba(255, 69, 58, 0.3)' }}
                             onClick={() => setIsLogoutModalOpen(true)}
                         >
