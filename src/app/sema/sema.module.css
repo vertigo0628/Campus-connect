@@ -1,5 +1,5 @@
 .feedWrapper {
-    min-height: 100dvh;
+    min-height: 100%;
     background: var(--bg-primary);
     max-width: var(--content-max-width);
     margin: 0 auto;

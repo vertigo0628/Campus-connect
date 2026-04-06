@@ -1,6 +1,6 @@
 /* ===== Profile Wrapper ===== */
 .profileWrapper {
-    min-height: 100dvh;
+    min-height: 100%;
     max-width: var(--content-max-width);
     margin: 0 auto;
     padding: 20px 16px;
