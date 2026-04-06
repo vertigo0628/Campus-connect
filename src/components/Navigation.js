@@ -85,69 +85,66 @@ export default function Navigation() {
             icon: <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2" /><circle cx="12" cy="7" r="4" /></svg>,
             iconFilled: <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2" /><circle cx="12" cy="7" r="4" /></svg>
         },
-        icon: <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2" /><circle cx="12" cy="7" r="4" /></svg>,
-        iconFilled: <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2" /><circle cx="12" cy="7" r="4" /></svg>
-        },
     ];
 
-const isActive = (path) => {
-    if (path === "/") return pathname === "/";
-    return pathname.startsWith(path);
-};
+    const isActive = (path) => {
+        if (path === "/") return pathname === "/";
+        return pathname.startsWith(path);
+    };
 
-return (
-    <>
-        {/* Desktop Top Nav */}
-        <nav className={styles.nav}>
-            <div className={styles.inner}>
-                <Link href="/" className={styles.brand}>
-                    <img src="/brand/logo.png" alt="Campus Connect Icon" className={styles.brandIcon} />
-                    <span className={styles.brandText}>Campus<span className={styles.brandAccent}>Connect</span></span>
-                </Link>
-
-                <div className={styles.desktopLinks}>
-                    {navItems.map((item) => (
-                        <Link
-                            key={item.path}
-                            href={item.path}
-                            className={`${styles.desktopLink} ${isActive(item.path) ? styles.desktopActive : ""}`}
-                            title={item.label}
-                        >
-                            {isActive(item.path) ? item.iconFilled : item.icon}
-                        </Link>
-                    ))}
-                </div>
-
-                <div className={styles.desktopRight}>
-                    <Link href="/profile" className={styles.avatarLink} style={{ position: 'relative' }}>
-                        <img
-                            src={user.photoURL || `https://ui-avatars.com/api/?name=${user.displayName || "U"}&background=1c1c1e&color=f5f5f7`}
-                            alt="You"
-                            className={`${styles.navAvatar} ${isActive("/profile") ? styles.navAvatarActive : ""}`}
-                        />
-                        {unreadCount > 0 && <span className={styles.badge} style={{ top: -4, right: -4 }}>{unreadCount}</span>}
+    return (
+        <>
+            {/* Desktop Top Nav */}
+            <nav className={styles.nav}>
+                <div className={styles.inner}>
+                    <Link href="/" className={styles.brand}>
+                        <img src="/brand/logo.png" alt="Campus Connect Icon" className={styles.brandIcon} />
+                        <span className={styles.brandText}>Campus<span className={styles.brandAccent}>Connect</span></span>
                     </Link>
-                </div>
-            </div>
-        </nav>
 
-        {/* Mobile Bottom Tab Bar */}
-        <nav className={styles.mobileBar}>
-            {navItems.map((item) => (
-                <Link
-                    key={item.path}
-                    href={item.path}
-                    className={`${styles.mobileTab} ${isActive(item.path) ? styles.mobileTabActive : ""}`}
-                >
-                    <span className={styles.tabIconWrap}>
-                        {isActive(item.path) ? item.iconFilled : item.icon}
-                        {item.label === "Profile" && unreadCount > 0 && (
-                            <span className={styles.badge}>{unreadCount}</span>
-                        )}
-                    </span>
-                </Link>
-            ))}
-        </nav>
-    </>
-);
+                    <div className={styles.desktopLinks}>
+                        {navItems.map((item) => (
+                            <Link
+                                key={item.path}
+                                href={item.path}
+                                className={`${styles.desktopLink} ${isActive(item.path) ? styles.desktopActive : ""}`}
+                                title={item.label}
+                            >
+                                {isActive(item.path) ? item.iconFilled : item.icon}
+                            </Link>
+                        ))}
+                    </div>
+
+                    <div className={styles.desktopRight}>
+                        <Link href="/profile" className={styles.avatarLink} style={{ position: 'relative' }}>
+                            <img
+                                src={user.photoURL || `https://ui-avatars.com/api/?name=${user.displayName || "U"}&background=1c1c1e&color=f5f5f7`}
+                                alt="You"
+                                className={`${styles.navAvatar} ${isActive("/profile") ? styles.navAvatarActive : ""}`}
+                            />
+                            {unreadCount > 0 && <span className={styles.badge} style={{ top: -4, right: -4 }}>{unreadCount}</span>}
+                        </Link>
+                    </div>
+                </div>
+            </nav>
+
+            {/* Mobile Bottom Tab Bar */}
+            <nav className={styles.mobileBar}>
+                {navItems.map((item) => (
+                    <Link
+                        key={item.path}
+                        href={item.path}
+                        className={`${styles.mobileTab} ${isActive(item.path) ? styles.mobileTabActive : ""}`}
+                    >
+                        <span className={styles.tabIconWrap}>
+                            {isActive(item.path) ? item.iconFilled : item.icon}
+                            {item.label === "Profile" && unreadCount > 0 && (
+                                <span className={styles.badge}>{unreadCount}</span>
+                            )}
+                        </span>
+                    </Link>
+                ))}
+            </nav>
+        </>
+    );
 }
