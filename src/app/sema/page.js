@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { db } from "@/lib/firebase";
-import { collection, query, orderBy, limit, onSnapshot, addDoc, serverTimestamp } from "firebase/firestore";
+import { collection, query, orderBy, limit, onSnapshot, addDoc, serverTimestamp, doc } from "firebase/firestore";
 import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/context/AuthContext";
 import SemaPost from "@/components/SemaPost";
