@@ -16,7 +16,23 @@ export default function CommentSection({ isOpen, onClose, post }) {
     const [filePreview, setFilePreview] = useState(null);
     const [submitting, setSubmitting] = useState(false);
     const [confirmState, setConfirmState] = useState({ isOpen: false, title: "", message: "", action: null, loading: false });
+    const [profile, setProfile] = useState(null);
     const bottomRef = useRef(null);
+
+    // Listen for current user's profile
+    useEffect(() => {
+        if (!user) {
+            setProfile(null);
+            return;
+        }
+        const docRef = doc(db, "profiles", user.uid);
+        const unsub = onSnapshot(docRef, (snap) => {
+            if (snap.exists()) {
+                setProfile(snap.data());
+            }
+        });
+        return () => unsub();
+    }, [user]);
 
     const handleFileSelect = (e) => {
         const file = e.target.files[0];
@@ -73,8 +89,8 @@ export default function CommentSection({ isOpen, onClose, post }) {
                 mediaUrl,
                 mediaType,
                 authorId: user.uid,
-                authorName: user.displayName || user.email?.split("@")[0] || "Comrade",
-                authorPhoto: user.photoURL || null,
+                authorName: profile?.displayName || user.displayName || user.email?.split("@")[0] || "Comrade",
+                authorPhoto: profile?.photoURL || user.photoURL || null,
                 createdAt: serverTimestamp()
             });
 

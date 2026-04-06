@@ -21,8 +21,24 @@ export default function SemaPage() {
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [isComposeExpanded, setIsComposeExpanded] = useState(false);
     const [commentPost, setCommentPost] = useState(null);
+    const [profile, setProfile] = useState(null);
 
     const categories = ["All", "Security", "Wellness", "Academics", "Market", "Gossip"];
+
+    // Listen for current user's profile
+    useEffect(() => {
+        if (!user) {
+            setProfile(null);
+            return;
+        }
+        const docRef = doc(db, "profiles", user.uid);
+        const unsub = onSnapshot(docRef, (snap) => {
+            if (snap.exists()) {
+                setProfile(snap.data());
+            }
+        });
+        return () => unsub();
+    }, [user]);
 
     // Real-time feed listener
     useEffect(() => {
@@ -103,7 +119,7 @@ export default function SemaPage() {
                 mediaUrl,
                 mediaType,
                 creatorId: user?.uid || "anonymous",
-                creatorName: user?.displayName || "Anonymous Comrade",
+                creatorName: profile?.displayName || user?.displayName || "Anonymous Comrade",
             });
 
             setNewMessage("");

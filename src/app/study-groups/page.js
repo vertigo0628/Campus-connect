@@ -14,6 +14,21 @@ export default function StudyGroupsPage() {
     const [loading, setLoading] = useState(true);
     const [searchQuery, setSearchQuery] = useState("");
     const [showModal, setShowModal] = useState(false);
+    const [profile, setProfile] = useState(null);
+
+    // Listen for current user's profile
+    useEffect(() => {
+        if (!user) {
+            setProfile(null);
+            return;
+        }
+        const unsub = onSnapshot(doc(db, "profiles", user.uid), (snap) => {
+            if (snap.exists()) {
+                setProfile(snap.data());
+            }
+        });
+        return () => unsub();
+    }, [user]);
 
     // Form State
     const [formData, setFormData] = useState({
@@ -43,9 +58,9 @@ export default function StudyGroupsPage() {
             await addDoc(collection(db, "study_groups"), {
                 ...formData,
                 creatorId: user.uid,
-                creatorName: user.displayName || "Anonymous Comrade",
+                creatorName: profile?.displayName || user.displayName || "Anonymous Comrade",
                 members: [user.uid],
-                memberNames: [user.displayName || "Comrade"],
+                memberNames: [profile?.displayName || user.displayName || "Comrade"],
                 createdAt: serverTimestamp()
             });
             setFormData({ unit: "", topic: "", venue: "", time: "", description: "", contact: "" });

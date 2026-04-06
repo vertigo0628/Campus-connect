@@ -1,8 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { db } from "@/lib/firebase";
-import { collection, addDoc, serverTimestamp } from "firebase/firestore";
+import { collection, addDoc, serverTimestamp, doc, onSnapshot } from "firebase/firestore";
 import { useAuth } from "@/context/AuthContext";
 import styles from "./MpesaPayment.module.css";
 
@@ -10,6 +10,15 @@ export default function MpesaPayment({ targetUserId, targetUserName }) {
     const { user } = useAuth();
     const [status, setStatus] = useState("idle"); // idle, processing, success, fail
     const [phoneNumber, setPhoneNumber] = useState("");
+    const [profile, setProfile] = useState(null);
+
+    useEffect(() => {
+        if (!user) return;
+        const unsub = onSnapshot(doc(db, "profiles", user.uid), (snap) => {
+            if (snap.exists()) setProfile(snap.data());
+        });
+        return () => unsub();
+    }, [user]);
 
     const handlePayment = (e) => {
         e.preventDefault();
@@ -22,7 +31,7 @@ export default function MpesaPayment({ targetUserId, targetUserName }) {
                 // Log Transaction to Firestore
                 await addDoc(collection(db, "transactions"), {
                     senderId: user?.uid || "anonymous",
-                    senderName: user?.displayName || "Anonymous Comrade",
+                    senderName: profile?.displayName || user?.displayName || "Anonymous Comrade",
                     targetId: targetUserId,
                     targetName: targetUserName,
                     amount: "Ksh 10.00", // Standard Hiring Fee for Demo
